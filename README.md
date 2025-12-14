@@ -1,9 +1,9 @@
 # backend_framework
 A Python WSGI backend interface using the Gunicorn web server.
 
-Run with 1 worker process:
+The server can be run be executing this command while in the `src` folder:
 ```bash
-gunicorn -w 1 -b 127.0.0.1:8000 --reload --log-level debug --capture-output api:api
+gunicorn -w 1 -b 127.0.0.1:8000 --reload --log-level debug --capture-output terminus.api:api
 ```
 This will restart when the python code changes.
 

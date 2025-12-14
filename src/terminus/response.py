@@ -1,9 +1,10 @@
+import json
 
 from wsgiref.types import StartResponse
 from typing import Any
 from enum import Enum
 from dataclasses import dataclass
-import json
+
 type RouteFnRes = tuple[Any] | tuple[Any, int]
 
 STATUS_CODE_MAP = {
@@ -67,7 +68,7 @@ class Response:
             try:
                 body_str = json.dumps(body)
             except TypeError as e:
-                body_str = json.dumps({"error": "Failed to parse body as JSON"})
+                body_str = json.dumps({"error": f"Failed to parse body as JSON: {e}"})
             content_type = ContentType.APPLICATION_JSON
         else:
             body_str = str(body)
@@ -81,6 +82,22 @@ class Response:
             content_type=content_type
         )
     
+    def send(self) -> list[bytes]:
+        """
+        Triggers the start response routine and returns the body in a format
+        that can be returned exactly by the WSGI callable entrypoint
+        """
+        self.response_routine()
+        return self.body
+    
+    @staticmethod
+    def send_err(start_response: StartResponse, err_msg: str) -> list[bytes]:
+        """Triggers the start response routine and returns the body for an error"""
+        err_status = Response.build_status(500)
+        err_header = [("Content-type", ContentType.APPLICATION_JSON.value)]
+        start_response(err_status, err_header)
+        return [json.dumps({"error": err_msg}).encode("utf-8")]
+    
     @staticmethod
     def build_status(status_code: int) -> str:
         """
@@ -91,10 +108,3 @@ class Response:
         else:
             return "500 " + STATUS_CODE_MAP[500]
         
-    def send(self) -> list[bytes]:
-        """
-        Triggers the start response routine and returns the body in a format
-        that can be returned exactly by the WSGI callable entrypoint
-        """
-        self.response_routine()
-        return self.body

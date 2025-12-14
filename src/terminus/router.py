@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from bisect import bisect_left, insort_left
-from typing import Callable, Any
+from typing import Callable
 
+from terminus.response import RouteFnRes
 from terminus.types import HTTPMethod, PathVariables, Request
 
-type RouteFnRes = tuple[Any] | tuple[Any, int]
 type RouteFn = Callable[[Request], RouteFnRes]
 type RouteMap = dict[HTTPMethod, dict[str, RouteFn]]
 

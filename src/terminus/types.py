@@ -43,7 +43,7 @@ class Headers:
 @dataclass(frozen=True)
 class Request:
     method: HTTPMethod
-    path: PathVariables
+    params: PathVariables
     query: QueryVariables
     protocol: str
     headers: Headers

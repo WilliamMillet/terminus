@@ -5,7 +5,7 @@ from typing import Any
 from enum import Enum
 from dataclasses import dataclass
 
-type RouteFnRes = tuple[Any] | tuple[Any, int]
+type RouteFnRes = Any | tuple[Any, int]
 
 STATUS_CODE_MAP = {
     200: "OK",
@@ -28,9 +28,19 @@ STATUS_CODE_MAP = {
     504: "Gateway Timeout"
 }
 
+VALID_BODY_TYPE_NAMES = [
+    "dict"
+    "list"
+    "bytes"
+    "int"
+    "str"
+    "bool"
+]
+
 class ContentType(Enum):
     TEXT_PLAIN = "text/plain"
     APPLICATION_JSON = "application/json"
+    APPLICATION_OCTET_STREAM = "application/octet-stream"
 
 @dataclass(frozen=True)
 class ResponseFields:
@@ -53,29 +63,36 @@ class Response:
         status, parses and encodes the body then returns relevant response
         fields
         """
-        if len(fn_res) == 1:
-            status = Response.build_status(200)
-        elif len(fn_res) == 2:
+        if isinstance(fn_res, tuple) and len(fn_res) == 2:
             status = Response.build_status(fn_res[1])
+            body = fn_res[0]
+        elif not isinstance(fn_res, tuple):
+            status = Response.build_status(200)
+            body = fn_res
         else:
             # Exception is raised here is this is a developer issue
-            raise Exception("Invalid route return value. Routes must return" +
-                            " either (body, status) or (body)")
+            raise Exception("Invalid route return value. If route is a tuple, it must be of the" +
+                            "The form (body, status)")
             
-        body = fn_res[0]
-        
-        if isinstance(body, dict | tuple | list):
+        if isinstance(body, dict | list):
             try:
                 body_str = json.dumps(body)
             except TypeError as e:
                 body_str = json.dumps({"error": f"Failed to parse body as JSON: {e}"})
             content_type = ContentType.APPLICATION_JSON
-        else:
+            encoded_body = body_str.encode("utf-8")
+        elif isinstance(body, bytes):
+            content_type = ContentType.APPLICATION_OCTET_STREAM
+            encoded_body = body
+        elif isinstance(body, int | float | str | bool):
             body_str = str(body)
             content_type = ContentType.TEXT_PLAIN
+            encoded_body = body_str.encode("utf-8")
+        else:
+            wrong_type = type(body).__name__
+            raise Exception(f"Unsupported response body type '{wrong_type}'. Accepted types" +
+                            "are:" + "\n - ".join(VALID_BODY_TYPE_NAMES) + "\n")
         
-        encoded_body = body_str.encode("utf-8")
-
         return ResponseFields(
             status=status,
             body=encoded_body,

@@ -11,6 +11,8 @@ class API:
     
     def __call__(self, environ: WSGIEnvironment,
                  res_rtn: StartResponse) -> Iterable[bytes]:
+        """Entrypoint to the gunicorn web server"""
+        
         method_str = environ["REQUEST_METHOD"]
         if method_str not in HTTPMethod.__members__:
             return Response.send_err(res_rtn, f"HTTP method '{method_str}' not recognised")
@@ -25,7 +27,7 @@ class API:
         
         req = Request(
             method=method,
-            path=Router.match_path_variables(route_details, path),
+            params=Router.match_path_variables(route_details, path),
             query=Request.build_query(environ["QUERY_STRING"]),
             protocol=environ["SERVER_PROTOCOL"],
             headers=Headers.of(environ)
@@ -36,12 +38,36 @@ class API:
         
         return http_res.send()
     
-        
-    def get(self, path: str):
+    def _build_route_decorator(self, method: HTTPMethod, path: str):
+        """Build a decorator function for some specific HTTP method"""
         def decorator(fn: RouteFn) -> RouteFn:
-            self.router.register_route(HTTPMethod.GET, path, fn)
+            self.router.register_route(method, path, fn)
             return fn
         return decorator
+        
+    def get(self, path: str):
+        return self._build_route_decorator(HTTPMethod.GET, path)
+
+    def post(self, path: str):
+        return self._build_route_decorator(HTTPMethod.POST, path)
+    
+    def put(self, path: str):
+        return self._build_route_decorator(HTTPMethod.PUT, path)
+    
+    def delete(self, path: str):
+        return self._build_route_decorator(HTTPMethod.DELETE, path)
+
+    def patch(self, path: str):
+        return self._build_route_decorator(HTTPMethod.PATCH, path)
+
+    def trace(self, path: str):
+        return self._build_route_decorator(HTTPMethod.TRACE, path)
+
+    def options(self, path: str):
+        return self._build_route_decorator(HTTPMethod.OPTIONS, path)
+
+    def connect(self, path: str):
+        return self._build_route_decorator(HTTPMethod.CONNECT, path)
 
 api = API()
 
@@ -60,7 +86,6 @@ def hello_foo_world(req: Request):
 @api.get("/hello/[param]/world")
 def hello_param_world(req: Request):
     return "hello_world [param mode]", 200
-
 
 @api.get("/hello/there")
 def hello_there(req: Request):

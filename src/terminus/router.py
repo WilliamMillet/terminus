@@ -8,6 +8,10 @@ type RouteFnRes = tuple[Any] | tuple[Any, int]
 type RouteFn = Callable[[Request], RouteFnRes]
 type RouteMap = dict[HTTPMethod, dict[str, RouteFn]]
 
+# We set wildcard to be the empty string so it's lexicographically minimal, and therefore we can
+# easily check for it at the start of the sorted child list
+WILDCARD = ""
+
 @dataclass(frozen=True)
 class RouteDetails:
     fn: RouteFn
@@ -36,14 +40,22 @@ class Router:
             
         curr = method_routes[len(parts)]
         for p in parts:
-            new_node = RouteNode(p)
-            pos_idx = bisect_left(curr.children, new_node)
-            
-            inbound = pos_idx < len(curr.children)
-            if not inbound or curr.children[pos_idx].content != p:
-                insort_left(curr.children, new_node)
-            
-            curr = curr.children[pos_idx]
+            if Router.is_param(p):
+                if len(curr.children) == 0 or curr.children[0] != WILDCARD:
+                    new_node = RouteNode(WILDCARD)
+                    curr.children.insert(0, new_node)
+                    curr = curr.children[0]
+                else:
+                    curr = curr.children[0]
+            else:
+                new_node = RouteNode(p)
+                pos_idx = bisect_left(curr.children, new_node)
+                
+                inbound = pos_idx < len(curr.children)
+                if not inbound or curr.children[pos_idx].content != p:
+                    insort_left(curr.children, new_node)
+                
+                curr = curr.children[pos_idx]
         
         path_var_indices: dict[int, str] = {}
         for i, p in enumerate(parts):
@@ -69,10 +81,15 @@ class Router:
             pos_idx = bisect_left(curr.children, new_node)
 
             inbound = pos_idx < len(curr.children)
-            if not inbound or curr.children[pos_idx].content != p:
-                return None
-            
-            curr = curr.children[pos_idx]
+            exact_match = inbound and curr.children[pos_idx].content == p
+            # If there is no exact match but a wildcard/path variable exists we follow that
+            if not exact_match:
+                if len(curr.children) >= 1 and curr.children[0].content == WILDCARD:
+                    curr = curr.children[0]
+                else:
+                    return None
+            else:
+                curr = curr.children[pos_idx]
         
         return curr.details
     
@@ -82,7 +99,7 @@ class Router:
         Match path variable values entered in the request URL to there names stored in
         route details
         """
-        req_parts = route_details.raw_path.split("/")
+        req_parts = req_path.split("/")
         
         path_obj: PathVariables = {}
         for idx, var_name in route_details.path_var_indices.items():
@@ -93,7 +110,7 @@ class Router:
     @staticmethod 
     def is_param(path_part: str) -> bool:
         """Determine if a part of a route is a path variable position"""
-        return path_part[0] == "[" and path_part[-1] == "]"
+        return len(path_part) >= 2 and path_part[0] == "[" and path_part[-1] == "]"
         
         
 class RouteNode:

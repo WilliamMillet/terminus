@@ -24,4 +24,3 @@ def test_simple_get(mocker: MockerFixture) -> None:
     res_list = list(res)
     assert len(res_list) == 1
     assert res_list[0].decode("utf-8") == "Hello World"
-

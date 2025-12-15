@@ -123,5 +123,5 @@ class Response:
         if status_code in STATUS_CODE_MAP:
             return str(status_code) + " " + STATUS_CODE_MAP[status_code]
         else:
-            return "500 " + STATUS_CODE_MAP[500]
+            return str(status_code)
         

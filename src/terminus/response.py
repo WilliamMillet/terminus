@@ -2,8 +2,9 @@ import json
 
 from wsgiref.types import StartResponse
 from typing import Any
-from enum import Enum
 from dataclasses import dataclass
+
+from terminus.types import ContentType
 
 type RouteFnRes = Any | tuple[Any, int]
 
@@ -36,11 +37,6 @@ VALID_BODY_TYPE_NAMES = [
     "str"
     "bool"
 ]
-
-class ContentType(Enum):
-    TEXT_PLAIN = "text/plain"
-    APPLICATION_JSON = "application/json"
-    APPLICATION_OCTET_STREAM = "application/octet-stream"
 
 @dataclass(frozen=True)
 class ResponseFields:

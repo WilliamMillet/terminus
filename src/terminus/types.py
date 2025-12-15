@@ -2,13 +2,8 @@
 General types not specific to any of the other modules
 """
 from enum import Enum
-from dataclasses import dataclass
 from wsgiref.types import WSGIEnvironment
-
-from urllib.parse import parse_qs
-
-type PathVariables = dict[str, str]
-type QueryVariables = dict[str, str | list[str]]
+from dataclasses import dataclass
 
 class HTTPMethod(Enum):
     GET = "GET"
@@ -20,6 +15,15 @@ class HTTPMethod(Enum):
     OPTIONS = "OPTIONS"
     CONNECT = "CONNECT"
     
+class ContentType(Enum):
+    TEXT_PLAIN = "text/plain"
+    APPLICATION_JSON = "application/json"
+    APPLICATION_OCTET_STREAM = "application/octet-stream"
+
+type PathVariables = dict[str, str]
+type QueryVariables = dict[str, str | list[str]]
+type RequestBody = dict | list | str | bytes
+
 @dataclass(frozen=True)
 class Headers:
     host: str
@@ -43,29 +47,8 @@ class Headers:
 @dataclass(frozen=True)
 class Request:
     method: HTTPMethod
+    body: RequestBody
     params: PathVariables
     query: QueryVariables
     protocol: str
     headers: Headers
-    
-    @staticmethod
-    def build_query(query_str: str) -> QueryVariables:
-        """Build the query parameter string from environmental variables"""
-        
-        parsed = parse_qs(query_str)
-        
-        query_vars: QueryVariables = {}
-        for key, val in parsed.items():
-            # This should always be true. the parse_qs return type is just arbitrarily typed
-            # with the Any type
-            assert all(isinstance(itm, str) for itm in val)
-            if len(val) == 1:
-                query_vars[key] = val[0]
-            else:
-                query_vars[key] = val
-        
-        return query_vars
-                 
-                 
-        
-    

@@ -63,7 +63,7 @@ class Router:
                 path_var_indices[i] = p[1:-1]
         
         curr.details = RouteDetails(fn, path_var_indices, raw_path)
-    
+        
     def match_route(self, method: HTTPMethod, raw_path: str) -> RouteDetails | None:
         """
         Takes a request path and method and returns the associated function. If

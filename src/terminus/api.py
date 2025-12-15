@@ -1,10 +1,10 @@
 from wsgiref.types import WSGIEnvironment, StartResponse
 from typing import Iterable
 
-from terminus.types import HTTPMethod, Request, Headers
+from terminus.types import HTTPMethod, Request
 from terminus.router import Router, RouteFn
 from terminus.response import Response
-from pprint import pprint
+from terminus.request_factory import RequestFactory
 
 class API:
     def __init__(self) -> None:
@@ -17,27 +17,18 @@ class API:
         method_str = environ["REQUEST_METHOD"]
         if method_str not in HTTPMethod.__members__:
             return Response.send_err(res_rtn, f"HTTP method '{method_str}' not recognised")
-        
         method = HTTPMethod(method_str)
         
-        path = environ.get("PATH_INFO", "/")
         
+        path = environ.get("PATH_INFO", "/")
         route_details = self.router.match_route(method, path)
         if route_details is None:
             return Response.send_err(res_rtn, f"Route '{method_str} {path}' not found")
         
-        req = Request(
-            method=method,
-            params=Router.match_path_variables(route_details, path),
-            query=Request.build_query(environ["QUERY_STRING"]),
-            protocol=environ["SERVER_PROTOCOL"],
-            headers=Headers.of(environ)
-        )
+        req = RequestFactory.build_req(environ, route_details)
         
         fn_res = route_details.fn(req)
         http_res = Response(fn_res, res_rtn)
-        
-        pprint(environ)
         
         return http_res.send()
     
@@ -74,7 +65,8 @@ class API:
 
 api = API()
 
-@api.get("/hello")
+# Temporary testing
+@api.post("/")
 def hello(req: Request):
     return "hello", 200
 

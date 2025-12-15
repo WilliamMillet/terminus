@@ -4,6 +4,7 @@ from typing import Iterable
 from terminus.types import HTTPMethod, Request, Headers
 from terminus.router import Router, RouteFn
 from terminus.response import Response
+from pprint import pprint
 
 class API:
     def __init__(self) -> None:
@@ -35,6 +36,8 @@ class API:
         
         fn_res = route_details.fn(req)
         http_res = Response(fn_res, res_rtn)
+        
+        pprint(environ)
         
         return http_res.send()
     

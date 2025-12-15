@@ -22,7 +22,6 @@ def build_environ(uri: str, method: HTTPMethod = HTTPMethod.GET) -> dict:
     environ: WSGIEnvironment = EXTRA_ENVIRON_DEFAULTS
     
     setup_testing_defaults(environ)
-    print(environ)
     
     parts = uri.split("?")
     assert len(parts) <= URI_MAX_PARTS

@@ -5,9 +5,6 @@ https://packaging.python.org/en/latest/tutorials/packaging-projects/
 
 # TODO
 Ordered
-- Handle dictionary return types being converted to JSON
-- Handle path parameters
-- Handle query parameters
 
 Long term
 - Handle default schema content type infering
@@ -37,3 +34,22 @@ schema = RouteSchema(
         "id": s.int(min=0, max=6)
     }
 )
+```
+## Things to test
+### Return related
+- Return the following json types
+    "dict"
+    "list"
+- Return the following primitive-like types
+    "bytes"
+    "int"
+    "str"
+    "bool"
+
+Test unsupported body type leads to an error being thrown
+
+Test unknown status code defaults to 500
+
+
+### Routing
+Test when route does not exist, an error json is shown

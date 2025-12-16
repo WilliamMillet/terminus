@@ -34,6 +34,7 @@ schema = RouteSchema(
     }
 )
 ```
+Maybe allow predicate applied on bodies (e.g. validate=lambda x: x in people)
 ## Things to test
 
 ### Routing

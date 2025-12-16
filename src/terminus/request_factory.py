@@ -58,9 +58,10 @@ class RequestFactory:
     @staticmethod
     def parse_body(body: BytesIO, content_type: str, content_len: int) -> RequestBody:
         c_type = ContentType(content_type)
-        if c_type == ContentType.APPLICATION_JSON:
-            return json.load(body)
-        elif c_type == ContentType.APPLICATION_OCTET_STREAM:
-            return body.read(content_len)
-        else:
-            return body.read(content_len).decode("utf-8")
+        match c_type:
+            case ContentType.APPLICATION_JSON:
+                return json.load(body)
+            case ContentType.APPLICATION_OCTET_STREAM:
+                return body.read(content_len)
+            case _:
+                return body.read(content_len).decode("utf-8")

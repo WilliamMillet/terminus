@@ -33,9 +33,11 @@ class Headers:
     accept_encoding: list[str]
     connection: str
     remote_address: str
+    content_type: ContentType |  None
     
     @staticmethod
     def of(environ: WSGIEnvironment) -> "Headers":
+        c_type = environ.get("CONTENT_TYPE", None)
         return Headers(
             host=environ["HTTP_HOST"],
             accept=environ["HTTP_ACCEPT"].split(","),
@@ -43,6 +45,7 @@ class Headers:
             accept_encoding = environ["HTTP_ACCEPT_ENCODING"].split(", "),
             connection = environ["HTTP_CONNECTION"],
             remote_address = environ["REMOTE_ADDR"],
+            content_type = None if c_type is None else ContentType(c_type)
         )
         
 @dataclass(frozen=True)

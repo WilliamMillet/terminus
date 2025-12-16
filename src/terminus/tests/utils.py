@@ -38,7 +38,7 @@ def build_environ(uri: str, method: HTTPMethod | str = HTTPMethod.GET,
     environ["RAW_URI"] = uri
     if body is not None:
         environ["wsgi.input"] = BytesIO(body.content)
-        environ["CONTENT_TYPE"] = body.content_type
+        environ["CONTENT_TYPE"] = body.content_type.value
         environ["CONTENT_LENGTH"] = body.content_length
     
     environ["REQUEST_METHOD"] = method if isinstance(method, str) else method.value

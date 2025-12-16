@@ -72,7 +72,7 @@ class Response:
         else:
             wrong_type = type(body).__name__
             raise Exception(f"Unsupported response body type '{wrong_type}'. Accepted types" +
-                            "are:" + "\n - ".join(VALID_BODY_TYPE_NAMES) + "\n")
+                            " are: \n" + "\n - ".join(VALID_BODY_TYPE_NAMES) + "\n")
         
         return ResponseFields(
             status=status,

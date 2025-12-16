@@ -1,5 +1,7 @@
 """
-Test for the request object passed to each function
+Test for the request object passed to each function.
+
+Params are not tested here because they are sufficiently covered in test_routing.py
 """
 import json
 import pytest
@@ -57,6 +59,10 @@ content_types = [
 @pytest.mark.parametrize("content_type, content", content_types)
 def test_content_type_set(mocker: MockerFixture, content_type: ContentType,
                           content: bytes) -> None:
+    """
+    Test that the content type is correctly set for each type of body. This inadvertently tests if
+    the body parsing works at all
+    """
     api = API()
     @api.post("/")
     def a(req: Request):
@@ -73,4 +79,50 @@ def test_content_type_set(mocker: MockerFixture, content_type: ContentType,
 
     body = next(iter(res)).decode("utf-8")
     assert body == content_type.value
+
+def test_method_set(mocker: MockerFixture):
+    api = API()
     
+    @api.delete("/")
+    def fn(req: Request):
+        return req.method.value
+    
+    start_response = mocker.Mock()
+    environ = build_environ("/", HTTPMethod.DELETE)
+    res = api(environ, start_response)
+
+    body = next(iter(res)).decode("utf-8")
+    assert body == HTTPMethod.DELETE.value
+
+def test_query_params_set(mocker: MockerFixture):
+    api = API()
+    
+    @api.get("/")
+    def fn(req: Request):
+        return req.query
+    
+    start_response = mocker.Mock()
+    res = api(build_environ("/?foo=bar&x=y&baz=1&baz=2") , start_response)
+    
+    body_dict = json.loads(next(iter(res)))
+    
+    assert body_dict == {
+        "foo": "bar",
+        "x": "y",
+        "baz": ["1", "2"]
+    }
+
+def test_server_protocol_set(mocker: MockerFixture):
+    api = API()
+    
+    @api.get("/")
+    def fn(req: Request):
+        return req.protocol
+    
+    start_response = mocker.Mock()
+    environ = build_environ("/")
+    res = api(environ, start_response)
+
+    body = next(iter(res)).decode("utf-8")
+    exp_environ = build_environ("/")
+    assert body == exp_environ["SERVER_PROTOCOL"] 

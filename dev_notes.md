@@ -4,9 +4,6 @@ https://rahmonov.me/posts/what-the-hell-is-wsgi-anyway-and-what-do-you-eat-it-wi
 https://packaging.python.org/en/latest/tutorials/packaging-projects/
 
 # TODO
-Test unknown HTTP method leads to appropriate error
-Test routing quirks, complex trees
-
 - And query parameters and other parameter parsers and validators
 - Add body and validators
 TO DO 

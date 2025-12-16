@@ -131,4 +131,18 @@ def test_query_params_matching(mocker: MockerFixture) -> None:
     res = api(build_environ(f"/?q={query_param}"), start_response)
     assert start_response.call_args[0][0] == "200 OK" 
     assert next(iter(res)).decode("utf-8") == query_param
+
+def test_register_duplicate_route(mocker: MockerFixture) -> None:
+    api = API()
     
+    @api.get("/")
+    def a(req: Request):
+        return req.query["q"]
+    
+    with pytest.raises(Exception):
+        @api.get("/")
+        def a_dup(req: Request):
+            return req.query["q"]
+        
+        start_response = mocker.Mock()
+        api(build_environ(f"/"), start_response)

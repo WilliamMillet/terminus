@@ -39,7 +39,7 @@ class Router:
             method_routes[len(parts)] = RouteNode(None)
             
         curr = method_routes[len(parts)]
-        for p in parts:
+        for i, p in enumerate(parts):
             if Router.is_param(p):
                 if len(curr.children) == 0 or curr.children[0] != WILDCARD:
                     new_node = RouteNode(WILDCARD)
@@ -54,6 +54,8 @@ class Router:
                 inbound = pos_idx < len(curr.children)
                 if not inbound or curr.children[pos_idx].content != p:
                     insort_left(curr.children, new_node)
+                elif i + 1 == len(parts):
+                    raise Exception(f"Cannot register route '{raw_path}' that already exists")
                 
                 curr = curr.children[pos_idx]
         

@@ -4,24 +4,14 @@ https://rahmonov.me/posts/what-the-hell-is-wsgi-anyway-and-what-do-you-eat-it-wi
 https://packaging.python.org/en/latest/tutorials/packaging-projects/
 
 # TODO
-- And query parameters and other parameter parsers and validators
-- Add body and validators
-TO DO 
+## Shorter term goals
+
+## Longer term goals
+- Add validator and parser system like the one described below
+- Add rate limiting based on IP
 
 ```py
-people = [
-    "John",
-    "Dave",
-    "Sarah",
-    "Will",
-    "Max",
-    "Sally",
-    "Jane",
-]
-
 schema = RouteSchema(
-    # When a dictionary body is used, terminus automatically infers that JSON
-    # is the data type. This is on by default but can be disabled
     body={
         "a": s.list(elements=(x | y), length=2)
         "b": s.string(pattern=my_regex) | None

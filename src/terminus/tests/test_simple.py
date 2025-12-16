@@ -17,10 +17,10 @@ def test_simple_get(mocker: MockerFixture) -> None:
     
     res = api(environ, start_response)
     
-    start_response.assert_called_once_with(
-        "200 OK",
-        [("Content-type", "text/plain")]
-    )
+    status_arg, headers_arg = start_response.call_args[0]
+    assert status_arg == "200 OK"
+    assert ("Content-type", "text/plain") in headers_arg
+    assert ("Content-Length", str(len("Hello World"))) in headers_arg
     
     res_list = list(res)
     assert len(res_list) == 1

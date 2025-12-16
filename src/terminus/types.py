@@ -1,11 +1,14 @@
 """
 General types not specific to any of the other modules
 """
-import json
 from enum import Enum
 from wsgiref.types import WSGIEnvironment
 from dataclasses import dataclass
 from terminus.constants import STATUS_CODE_MAP
+
+type PathVariables = dict[str, str]
+type QueryVariables = dict[str, str | list[str]]
+type RequestBody = dict | list | str | bytes
 
 class HTTPMethod(Enum):
     GET = "GET"
@@ -21,10 +24,6 @@ class ContentType(Enum):
     TEXT_PLAIN = "text/plain"
     APPLICATION_JSON = "application/json"
     APPLICATION_OCTET_STREAM = "application/octet-stream"
-
-type PathVariables = dict[str, str]
-type QueryVariables = dict[str, str | list[str]]
-type RequestBody = dict | list | str | bytes
 
 @dataclass(frozen=True)
 class Headers:

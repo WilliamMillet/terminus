@@ -27,10 +27,13 @@ class ResponseFields:
 class Response:
     def __init__(self, fn_res: RouteFnRes, start_response: StartResponse) -> None:
         res_fields = Response.parse_function_res(fn_res)
-        headers = [("Content-type", res_fields.content_type.value)]
-        self.response_routine = lambda: start_response(res_fields.status, headers)
-        
         self.body = [res_fields.body]
+        headers = [
+            ("Content-type", res_fields.content_type.value),
+            ("Content-Length", str(len(res_fields.body)))
+        ]
+        
+        self.response_routine = lambda: start_response(res_fields.status, headers)
             
     @staticmethod
     def parse_function_res(fn_res: RouteFnRes) -> ResponseFields:
@@ -54,7 +57,9 @@ class Response:
             try:
                 body_str = json.dumps(body)
             except TypeError as e:
-                body_str = json.dumps({"error": f"Failed to parse body as JSON: {e}"})
+                raise Exception(f"Body container type is valid (f{type(body)}), but it failed" +
+                                "to be parsed. This is likely due to an invalid inner key such" +
+                                f"as a tuple, frozenset, etc. Parsing Error:\n {e}")
             content_type = ContentType.APPLICATION_JSON
             encoded_body = body_str.encode("utf-8")
         elif isinstance(body, bytes):

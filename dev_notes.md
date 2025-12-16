@@ -7,12 +7,8 @@ https://packaging.python.org/en/latest/tutorials/packaging-projects/
 Test unknown HTTP method leads to appropriate error
 Test routing quirks, complex trees
 
-Double check im returning content length in the response
-
-Long term
-- Handle default schema content type infering
-- Handle turning turning off default schema content type infering
-
+- And query parameters and other parameter parsers and validators
+- Add body and validators
 TO DO 
 
 ```py
@@ -42,3 +38,5 @@ schema = RouteSchema(
 
 ### Routing
 Test when route does not exist, an error json is shown
+
+Test post routes

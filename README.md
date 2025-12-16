@@ -41,7 +41,7 @@ def hello_world(req: Request):
 
     return users[user_id], 200
 ```
-To return a response in your API endpoint, there are several options. If you wish to specify the status code, you must return a tuple `(body, status)`. The status field here must be an integer. The body can be of a range of types. The primitive-like types supported are `str`, `int`, `bool` which are stringified and encoded in UTF-8, as `bytes` which is left as is. For these types the *Content-Type* HTTP header will be set to `text/plain`, unless binary is used in which `application/octet-stream` is set Lists. and dictionaries are also supported. When either of these is returned, they are parsed to a JSON string which is encoded into a UTF-8 format. The content type will then be automatically set to `application/json`.
+To return a response in your API endpoint, there are several options. If you wish to specify the status code, you must return a tuple `(body, status)`. The status field here must be an integer. The body can be of a range of types. The primitive-like types supported are `str`, `int`, `bool` which are stringified and encoded in UTF-8, as `bytes` which is left as is. For these types the *Content-Type* HTTP header will be set to `text/plain`, unless binary is used in which `application/octet-stream` is set. Lists and dictionaries are also supported. When either of these is returned, they are parsed to a JSON string which is encoded into a UTF-8 format. The content type will then be automatically set to `application/json`.
 
 If you return a non-tuple, the whole return type will be treated as the body and the status code will be automatically set to 200.
 ```py

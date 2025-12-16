@@ -23,7 +23,7 @@ class API:
         path = environ.get("PATH_INFO", "/")
         route_details = self.router.match_route(method, path)
         if route_details is None:
-            return Response.send_err(start_response, f"Route '{method_str} {path}' not found")
+            return Response.send_err(start_response, f"Route '{method_str} {path}' not found", 404)
         
         try:
             req = RequestFactory.build_req(environ, route_details)

@@ -5,10 +5,13 @@ https://packaging.python.org/en/latest/tutorials/packaging-projects/
 
 # TODO
 ## Shorter term goals
+- Middleware
 
 ## Longer term goals
 - Add validator and parser system like the one described below
+- IP white list or black list
 - Add rate limiting based on IP
+- Cooking parsing
 
 ```py
 schema = RouteSchema(

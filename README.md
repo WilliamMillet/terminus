@@ -41,6 +41,7 @@ def hello_world(req: Request):
 
     return users[user_id], 200
 ```
+## Responses
 To return a response in your API endpoint, there are several options. If you wish to specify the status code, you must return a tuple `(body, status)`. The status field here must be an integer. The body can be of a range of types. The primitive-like types supported are `str`, `int`, `bool` which are stringified and encoded in UTF-8, as `bytes` which is left as is. For these types the *Content-Type* HTTP header will be set to `text/plain`, unless binary is used in which `application/octet-stream` is set. Lists and dictionaries are also supported. When either of these is returned, they are parsed to a JSON string which is encoded into a UTF-8 format. The content type will then be automatically set to `application/json`.
 
 If you return a non-tuple, the whole return type will be treated as the body and the status code will be automatically set to 200.
@@ -51,4 +52,18 @@ return "Failed to found user", 404
 # ...Single return
 return "Hello World
 ```
-When including a body in an HTTP request, you must include the headers `Content-Type` and `Content-Length`. Failing to do this will lead to a 400 status code response. By default in Terminus, bodies will be automatically parsed according to the content type. For example, JSON responses will be parsed to dictionaries. A feature to disable this should be added in the future.
+## Requests
+Terminus provides an immutable `Request` object for interacting with the HTTP request that triggered a function call. This provides the following properties
+- `method`: An `HTTPMethod` enum representing the method used in the request. The value of this enum will be the capitalised method name
+- `body`: The body of the call parsed as a `dict`, `list`, `str` or `bytes` in accordance with the `Content-Type` header. When including a body in an HTTP request, you must include the headers `Content-Type` and `Content-Length`. Failing to do this will lead to a 400 status code response. By default in Terminus, bodies will be automatically parsed according to the content type. For example, JSON responses will be parsed to dictionaries. A feature to disable this should be added in the future.
+- `params`: A dictionary of path parameters
+- `query`: A dictionary of query parameters. The values of this dictionary can be either a single string, or a list of strings if there where multiple of one key in the URL (e.g. `/app?a=1&a=2&a=3`).
+- `protocol`: The HTTP protocol string.
+- `headers`: A `Header` dataclass containing relevant HTTP headers. These headers are:
+    - `host`: The HTTP host string
+    - `accept`: The `Accept` HTTP key split into a list of strings by spaces
+    - `accept_language`: The `Accept-Language` HTTP key split into a list by spaces
+    - `accept_encoding`: The `Accept-Encoding` HTTP key split into a list by spaces
+    - `connection`: The `Connection` header value as a string
+    - `remote_address`: The string IP of the requester
+    - `content_type`: A `ContentType` enum representing the content type being sent (e.g "`application/json`"). The value of this will be the actual content type header string.

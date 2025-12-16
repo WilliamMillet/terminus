@@ -12,6 +12,7 @@ https://packaging.python.org/en/latest/tutorials/packaging-projects/
 - IP white list or black list
 - Add rate limiting based on IP
 - Cooking parsing
+- Allow for content types other then the ones I support. It is very limited as of now
 
 ```py
 schema = RouteSchema(

@@ -1,7 +1,9 @@
 
 from wsgiref.util import setup_testing_defaults
-from wsgiref.types import WSGIEnvironment, StartResponse
+from wsgiref.types import WSGIEnvironment
+from io import BytesIO
 
+from terminus.tests.types import BodyDTO
 from terminus.types import HTTPMethod
 
 URI_MAX_PARTS = 2
@@ -14,7 +16,8 @@ EXTRA_ENVIRON_DEFAULTS = {
     'REMOTE_ADDR': '127.0.0.1'
 }
 
-def build_environ(uri: str, method: HTTPMethod = HTTPMethod.GET) -> dict:
+def build_environ(uri: str, method: HTTPMethod | str = HTTPMethod.GET,
+                  body: BodyDTO | None = None) -> dict:
     """
     Create a dictionary of WSGI endpoint environmental variables using a set of defaults as well
     as a provided raw URI (path + query parameters concatenated) and an HTTP method 
@@ -33,7 +36,11 @@ def build_environ(uri: str, method: HTTPMethod = HTTPMethod.GET) -> dict:
     environ["PATH_INFO"] = path
     environ["QUERY_STRING"] = query
     environ["RAW_URI"] = uri
+    if body is not None:
+        environ["wsgi.input"] = BytesIO(body.content)
+        environ["CONTENT_TYPE"] = body.content_type
+        environ["CONTENT_LENGTH"] = body.content_length
     
-    environ["REQUEST_METHOD"] = method.value 
+    environ["REQUEST_METHOD"] = method if isinstance(method, str) else method.value
 
     return environ

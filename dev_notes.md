@@ -4,7 +4,10 @@ https://rahmonov.me/posts/what-the-hell-is-wsgi-anyway-and-what-do-you-eat-it-wi
 https://packaging.python.org/en/latest/tutorials/packaging-projects/
 
 # TODO
-Ordered
+Test unknown HTTP method leads to appropriate error
+Test routing quirks, complex trees
+
+Double check im returning content length in the response
 
 Long term
 - Handle default schema content type infering
@@ -36,20 +39,6 @@ schema = RouteSchema(
 )
 ```
 ## Things to test
-### Return related
-- Return the following json types
-    "dict"
-    "list"
-- Return the following primitive-like types
-    "bytes"
-    "int"
-    "str"
-    "bool"
-
-Test unsupported body type leads to an error being thrown
-
-Test unknown status code defaults to 500
-
 
 ### Routing
 Test when route does not exist, an error json is shown

@@ -1,7 +1,7 @@
 from wsgiref.types import WSGIEnvironment, StartResponse
 from typing import Iterable
 
-from terminus.types import HTTPMethod, Request
+from terminus.types import HTTPMethod, Request, HTTPError
 from terminus.router import Router, RouteFn
 from terminus.response import Response
 from terminus.request_factory import RequestFactory
@@ -11,24 +11,27 @@ class API:
         self.router = Router()
     
     def __call__(self, environ: WSGIEnvironment,
-                 res_rtn: StartResponse) -> Iterable[bytes]:
+                 start_response: StartResponse) -> Iterable[bytes]:
         """Entrypoint to the gunicorn web server"""
         
         method_str = environ["REQUEST_METHOD"]
         if method_str not in HTTPMethod.__members__:
-            return Response.send_err(res_rtn, f"HTTP method '{method_str}' not recognised")
+            return Response.send_err(start_response, f"HTTP method '{method_str}' not recognised")
         method = HTTPMethod(method_str)
         
         
         path = environ.get("PATH_INFO", "/")
         route_details = self.router.match_route(method, path)
         if route_details is None:
-            return Response.send_err(res_rtn, f"Route '{method_str} {path}' not found")
+            return Response.send_err(start_response, f"Route '{method_str} {path}' not found")
         
-        req = RequestFactory.build_req(environ, route_details)
+        try:
+            req = RequestFactory.build_req(environ, route_details)
+        except HTTPError as e:
+            return Response.send_err(start_response, str(e), e.status)
         
         fn_res = route_details.fn(req)
-        http_res = Response(fn_res, res_rtn)
+        http_res = Response(fn_res, start_response)
         
         return http_res.send()
     

@@ -51,3 +51,4 @@ return "Failed to found user", 404
 # ...Single return
 return "Hello World
 ```
+When including a body in an HTTP request, you must include the headers `Content-Type` and `Content-Length`. Failing to do this will lead to a 400 status code response. By default in Terminus, bodies will be automatically parsed according to the content type. For example, JSON responses will be parsed to dictionaries. A feature to disable this should be added in the future.

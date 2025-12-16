@@ -5,29 +5,9 @@ from typing import Any
 from dataclasses import dataclass
 
 from terminus.types import ContentType
+from terminus.constants import STATUS_CODE_MAP
 
 type RouteFnRes = Any | tuple[Any, int]
-
-STATUS_CODE_MAP = {
-    200: "OK",
-    201: "Created",
-    202: "Accepted",
-    204: "No Content",
-    301: "Moved Permanently",
-    302: "Found",
-    304: "Not Modified",
-    400: "Bad Request",
-    401: "Unauthorized",
-    403: "Forbidden",
-    404: "Not Found",
-    405: "Method Not Allowed",
-    408: "Request Timeout",
-    500: "Internal Server Error",
-    501: "Not Implemented",
-    502: "Bad Gateway",
-    503: "Service Unavailable",
-    504: "Gateway Timeout"
-}
 
 VALID_BODY_TYPE_NAMES = [
     "dict"
@@ -104,9 +84,9 @@ class Response:
         return self.body
     
     @staticmethod
-    def send_err(start_response: StartResponse, err_msg: str) -> list[bytes]:
+    def send_err(start_response: StartResponse, err_msg: str, err_code: int = 500) -> list[bytes]:
         """Triggers the start response routine and returns the body for an error"""
-        err_status = Response.build_status(500)
+        err_status = Response.build_status(err_code)
         err_header = [("Content-type", ContentType.APPLICATION_JSON.value)]
         start_response(err_status, err_header)
         return [json.dumps({"error": err_msg}).encode("utf-8")]

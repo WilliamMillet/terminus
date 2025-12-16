@@ -1,4 +1,5 @@
 
+import json
 from pytest_mock import MockerFixture
 
 from terminus.api import API
@@ -24,3 +25,24 @@ def test_simple_get(mocker: MockerFixture) -> None:
     res_list = list(res)
     assert len(res_list) == 1
     assert res_list[0].decode("utf-8") == "Hello World"
+    
+def test_unknown_http_method_sends_err(mocker: MockerFixture) -> None:
+    api = API()
+    @api.get("/hello/world")
+    def hello(req: Request):
+        return "Hello World", 200
+    
+    environ = build_environ("/hello/world", "FAKE_METHOD") 
+    start_response = mocker.Mock()
+    
+    res = api(environ, start_response)
+    
+    args = start_response.call_args[0]
+    assert len(args) == 2
+    status_arg, headers_arg = args
+    assert "500" in status_arg
+    assert headers_arg == [("Content-type", "application/json")] 
+    
+    assert "error" in json.loads(next(iter(res)))
+    
+    

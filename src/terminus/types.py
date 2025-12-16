@@ -1,9 +1,11 @@
 """
 General types not specific to any of the other modules
 """
+import json
 from enum import Enum
 from wsgiref.types import WSGIEnvironment
 from dataclasses import dataclass
+from terminus.constants import STATUS_CODE_MAP
 
 class HTTPMethod(Enum):
     GET = "GET"
@@ -47,8 +49,17 @@ class Headers:
 @dataclass(frozen=True)
 class Request:
     method: HTTPMethod
-    body: RequestBody
+    body: RequestBody | None
     params: PathVariables
     query: QueryVariables
     protocol: str
     headers: Headers
+    
+class HTTPError(Exception):
+    """
+    An error related to an HTTP request, response or parsing of data associated with these entities
+    """
+    def __init__(self, msg: str) -> None:
+        super().__init__(msg)
+        self.status = 400
+        

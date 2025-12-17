@@ -58,7 +58,7 @@ class Request:
     query: QueryVariables
     protocol: str
     headers: Headers
-    context: dict[Any, Any] = field(default_factory=dict, init=False)
+    context: dict[Any, Any] = field(default_factory=dict)
     
 class HTTPError(Exception):
     """

@@ -1,9 +1,11 @@
 from typing import Callable
 from terminus.router import RouteFn
-from terminus.types import Request, RouteFnRes, Request, HTTPError
+from terminus.types import Request, RouteFnRes, Request
 
 type MiddlewareFnRes = RouteFnRes | None
 type MiddlewareFn = Callable[[Request], MiddlewareFnRes]
+# Afterware cannot return a response
+type AfterWareFn = Callable[[Request], None]
 
 class ExecutionPipeline:
     def __init__(self) -> None:
@@ -16,7 +18,7 @@ class ExecutionPipeline:
         """
         self._before_fn.append(fn)
         
-    def add_after_main_fn(self, fn: MiddlewareFn) -> None:
+    def add_after_main_fn(self, fn: AfterWareFn) -> None:
         """
         Add a function to the middleware pipeline right before the main route function
         """
@@ -33,15 +35,11 @@ class ExecutionPipeline:
                 return middleware_res
         
         main_fn_res = fn(req)
-        if len(self._after_fn) == 0:
-            return main_fn_res
         
         for middleware in self._after_fn:
             middleware_res = middleware(req)
-            if middleware_res:
-                return middleware_res
-
-        raise HTTPError("Middleware after main function does not return a response")
+        
+        return main_fn_res
         
         
             

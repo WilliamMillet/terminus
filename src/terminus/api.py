@@ -5,7 +5,7 @@ from terminus.types import HTTPMethod, Request, HTTPError
 from terminus.router import Router, RouteFn
 from terminus.response import Response
 from terminus.request_factory import RequestFactory
-from terminus.execution_pipeline import ExecutionPipeline
+from terminus.execution_pipeline import ExecutionPipeline, MiddlewareFn, AfterWareFn
 
 type RouteDecorator = Callable[[RouteFn], RouteFn]
 
@@ -45,7 +45,7 @@ class API:
             return fn
         return decorator
     
-    def __getattr__(self, name: str) -> Any:
+    def __getattr__(self, name: str) -> Callable[[str], RouteDecorator]:
         uppercased = name.upper()
         if uppercased in HTTPMethod:
             def decorator_builder(path: str, **kwargs) -> RouteDecorator:
@@ -53,7 +53,17 @@ class API:
             return decorator_builder
         else:
             raise AttributeError(f"API attribute '{name}' unknown")
-
+        
+    def pre_request(self, fn: MiddlewareFn):
+        """Global middleware to execute before the core route function anytime a route is called"""
+        self.pipeline.add_before_main_fn(fn)
+        return fn
+    
+    def after_request(self, fn: AfterWareFn):
+        """Global middleware to execute after the route function anytime a route is called"""
+        self.pipeline.add_after_main_fn(fn)
+        return fn
+            
 api = API()
 
 # Temporary testing

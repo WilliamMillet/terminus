@@ -67,3 +67,39 @@ Terminus provides an immutable `Request` object for interacting with the HTTP re
     - `connection`: The `Connection` header value as a string
     - `remote_address`: The string IP of the requester
     - `content_type`: A `ContentType` enum representing the content type being sent (e.g "`application/json`"). The value of this will be the actual content type header string.
+
+## Middleware
+Terminus supports the use of middleware before and after a core function request. This can be used for authentication, logging, validation and various other tasks. One way to start a global middleware *pipeline* is to use the `pre_request` decorator:
+```py
+@api.pre_request
+def pre1(req: Request):
+    pass
+```
+Declaring a function with this decorator will add this middleware to the end of the pre-function routines in the middleware pipeline. This means that when any route in an API is called, this middleware will be executed first. In pre-request middleware you can either return a value or not return a value. If you don't return a value, the middleware pipeline will continue as normal and the next function will be executed. If you do return a value, it must be a regular request function return type (e.g. a body and status code tuple, or just a body). This will end the pipeline and return that body and status code if one is provided.
+
+You can also declare `after_request` decorated functions
+```py
+@api.after_request
+def after(req: Request):
+    pass
+``` 
+This will execute after your primary function has returned. Unlike pre-primary function middleware, this cannot return a value, so it is largely limited to logging an interaction with external systems.
+
+In both pre and after requests, you can read and write to a `context` property of the request object
+```py
+@api.pre_request
+def pre1(req: Request):
+    # Reading
+    print(req.context["Foo"])
+    # Writing
+    print(req.context["Bar"]) = 10
+```
+This is the most effective way of transferring information between middleware. It is particularly useful for authentication/authorisation scenarios, as you can store details of the authenticated user after validating them.
+```py
+@api.pre_request
+def auth(req: Request):
+    # Auth checks
+    req.context["username"] = validated_username
+    req.context["email"] = validated_email
+    req.context["id"] = validated_id
+```

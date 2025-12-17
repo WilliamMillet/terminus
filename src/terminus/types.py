@@ -2,13 +2,15 @@
 General types not specific to any of the other modules
 """
 from enum import Enum
+from typing import Any
 from wsgiref.types import WSGIEnvironment
-from dataclasses import dataclass
-from terminus.constants import STATUS_CODE_MAP
+from dataclasses import dataclass, field
 
 type PathVariables = dict[str, str]
 type QueryVariables = dict[str, str | list[str]]
 type RequestBody = dict | list | str | bytes
+
+type RouteFnRes = Any | tuple[Any, int]
 
 class HTTPMethod(Enum):
     GET = "GET"
@@ -56,6 +58,7 @@ class Request:
     query: QueryVariables
     protocol: str
     headers: Headers
+    context: dict[Any, Any] = field(default_factory=dict, init=False)
     
 class HTTPError(Exception):
     """

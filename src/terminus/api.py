@@ -31,13 +31,12 @@ class API:
         
         try:
             req = RequestFactory.build_req(environ, route_details)
+            pipeline_res = self.pipeline.execute(route_details.fn, req)
         except HTTPError as e:
             return Response.send_err(start_response, str(e), e.status)
-        
-        fn_res = route_details.fn(req)
-        http_res = Response(fn_res, start_response)
-        
-        return http_res.send()
+        else:
+            http_res = Response(pipeline_res, start_response)
+            return http_res.send()
     
     def _build_route_decorator(self, method: HTTPMethod, path: str) -> RouteDecorator:
         """Build a decorator function for some specific HTTP method"""

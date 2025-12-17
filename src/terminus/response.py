@@ -4,10 +4,8 @@ from wsgiref.types import StartResponse
 from typing import Any
 from dataclasses import dataclass
 
-from terminus.types import ContentType
+from terminus.types import ContentType, RouteFnRes
 from terminus.constants import STATUS_CODE_MAP
-
-type RouteFnRes = Any | tuple[Any, int]
 
 VALID_BODY_TYPE_NAMES = [
     "dict"

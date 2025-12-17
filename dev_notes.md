@@ -6,6 +6,7 @@ https://packaging.python.org/en/latest/tutorials/packaging-projects/
 # TODO
 ## Shorter term goals
 - Middleware
+- Go through and privatise private variables
 
 ## Longer term goals
 - Add validator and parser system like the one described below
@@ -13,6 +14,10 @@ https://packaging.python.org/en/latest/tutorials/packaging-projects/
 - Add rate limiting based on IP
 - Cooking parsing
 - Allow for content types other then the ones I support. It is very limited as of now
+
+-Implement a configuration object to app or something, then pass that to constructors. Maybe have it as a non mutable dataclass with Pythons setter and getter decorators on each thing.
+
+
 
 ```py
 schema = RouteSchema(

@@ -5,7 +5,8 @@ https://packaging.python.org/en/latest/tutorials/packaging-projects/
 
 # TODO
 ## Shorter term goals
-- Middleware
+Consider reusing compose_middleware for both global and route specific middleware
+
 - Go through and privatise private variables
 
 ## Longer term goals

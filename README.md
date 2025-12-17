@@ -103,3 +103,16 @@ def auth(req: Request):
     req.context["email"] = validated_email
     req.context["id"] = validated_id
 ```
+
+# Technical notes
+The 8 near identical methods `get`, `post`, `put`, etc in `api.py` do not constitute the prettiest code, although I am of the belief it is superior to the alternative. Previously I used
+the  use the `__getattr__` method. However, there a fundamental problems that arise when using this method with static type checkers like MyPy. When typing this function, we would have to use the Callable type from typing which does not allow for optional arguments.
+```py
+def __getattr__(self, name: str) -> Callable[[str, list[MiddlewareFn] | None, list[MiddlewareFn] | None], RouteDecorator # Many more arguments...
+	pass
+```
+So, MyPy will continuously get upset with you. The current routes are not perfect, but with unpacked typed dicts they are reasonably compact and work well from a static perspective
+```py
+def get(self, path, **opts: Unpack[RouteOptions]):
+        return self._build_route_decorator(HTTPMethod.GET, path, **opts) 
+```

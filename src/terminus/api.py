@@ -52,6 +52,16 @@ class API:
             return fn
         return decorator
     
+    def pre_request(self, fn: MiddlewareFn):
+        """Global middleware to execute before the core route function anytime a route is called"""
+        self.pipeline.add_before_main_fn(fn)
+        return fn
+    
+    def after_request(self, fn: AfterWareFn):
+        """Global middleware to execute after the route function anytime a route is called"""
+        self.pipeline.add_after_main_fn(fn)
+        return fn
+    
     # Separate methods are used here over a generalised __getattr__ method as it allows for
     # better type hinting with static type checkers
     
@@ -78,17 +88,6 @@ class API:
 
     def connect(self, path, **opts: Unpack[RouteOptions]):
         return self._build_route_decorator(HTTPMethod.CONNECT, path, **opts)
-
-        
-    def pre_request(self, fn: MiddlewareFn):
-        """Global middleware to execute before the core route function anytime a route is called"""
-        self.pipeline.add_before_main_fn(fn)
-        return fn
-    
-    def after_request(self, fn: AfterWareFn):
-        """Global middleware to execute after the route function anytime a route is called"""
-        self.pipeline.add_after_main_fn(fn)
-        return fn
             
 api = API()
 

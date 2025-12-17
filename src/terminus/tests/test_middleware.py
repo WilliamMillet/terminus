@@ -3,7 +3,9 @@ from pytest import CaptureFixture
 
 from terminus.api import API
 from terminus.tests.utils import build_environ
-from terminus.types import Request, HTTPMethod
+from terminus.types import Request, HTTPMethod, RouteFnRes
+
+# Global middleware tests
 
 def test_simple_pre_middleware(mocker: MockerFixture) -> None:
     api = API()
@@ -91,6 +93,43 @@ def test_middleware_pipeline(mocker: MockerFixture, capsys: CaptureFixture) -> N
     assert "200" in status_args 
     assert ("Content-type", "text/plain") in headers_arg
     assert next(iter(res)).decode("utf-8") == "ab"
+
+    std_buffers = capsys.readouterr()
+    assert "MY_UNIQUE_STRING" in str(std_buffers)
+    
+# Route specific middleware tests
+
+def test_specific_pre_route_middleware(mocker: MockerFixture) -> None:
+    api = API()
+    
+    def foo_ware(req: Request):
+        req.context["foo"] = "bar"
+    
+    @api.get("/", pre=[foo_ware])
+    def fn(req: Request):
+        return req.context["foo"]
+    
+    start_response = mocker.Mock()
+    environ = build_environ("/", HTTPMethod.GET)
+    res = api(environ, start_response)
+
+    body = next(iter(res)).decode("utf-8")
+    assert body == "bar"
+
+def test_specific_post_route_middleware(mocker: MockerFixture, capsys: CaptureFixture) -> None:
+    api = API()
+    
+    @api.after_request
+    def post_ware(req: Request):
+        print("MY_UNIQUE_STRING")
+        
+    @api.get("/", after=[post_ware])
+    def fn(req: Request):
+        return "Test"
+    
+    start_response = mocker.Mock()
+    environ = build_environ("/", HTTPMethod.GET)
+    api(environ, start_response)
 
     std_buffers = capsys.readouterr()
     assert "MY_UNIQUE_STRING" in str(std_buffers)

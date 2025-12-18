@@ -17,7 +17,8 @@ EXTRA_ENVIRON_DEFAULTS = {
 }
 
 def build_environ(uri: str, method: HTTPMethod | str = HTTPMethod.GET,
-                  body: BodyDTO | None = None) -> dict:
+                  body: BodyDTO | None = None,
+                  custom_fields: dict[str, str] | None = None) -> dict:
     """
     Create a dictionary of WSGI endpoint environmental variables using a set of defaults as well
     as a provided raw URI (path + query parameters concatenated) and an HTTP method 
@@ -40,6 +41,9 @@ def build_environ(uri: str, method: HTTPMethod | str = HTTPMethod.GET,
         environ["wsgi.input"] = BytesIO(body.content)
         environ["CONTENT_TYPE"] = body.content_type.value
         environ["CONTENT_LENGTH"] = body.content_length
+    
+    if custom_fields is not None:
+        environ.update(custom_fields)
     
     environ["REQUEST_METHOD"] = method if isinstance(method, str) else method.value
 

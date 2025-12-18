@@ -18,7 +18,8 @@ Consider reusing compose_middleware for both global and route specific middlewar
 
 -Implement a configuration object to app or something, then pass that to constructors. Maybe have it as a non mutable dataclass with Pythons setter and getter decorators on each thing.
 
-
+# Things I will not do 
+Rate limiter (Due to peristence issues with gunicorn)
 
 ```py
 schema = RouteSchema(

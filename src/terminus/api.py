@@ -1,5 +1,5 @@
 from wsgiref.types import WSGIEnvironment, StartResponse
-from typing import Iterable, Callable, TypedDict, Unpack
+from typing import Iterable, Callable, TypedDict, Unpack, Any
 
 from terminus.types import HTTPMethod, Request, HTTPError
 from terminus.router import Router, RouteFn
@@ -90,6 +90,7 @@ class API:
         return self._build_route_decorator(HTTPMethod.CONNECT, path, **opts)
             
 api = API()
+
 
 # Temporary testing
 @api.post("/")

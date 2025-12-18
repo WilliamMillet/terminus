@@ -5,14 +5,11 @@ https://packaging.python.org/en/latest/tutorials/packaging-projects/
 
 # TODO
 ## Shorter term goals
-Consider reusing compose_middleware for both global and route specific middleware
-
 - Go through and privatise private variables
 
 ## Longer term goals
+- Add a TOML with details like name, description, minimum version
 - Add validator and parser system like the one described below
-- IP white list or black list
-- Add rate limiting based on IP
 - Cooking parsing
 - Allow for content types other then the ones I support. It is very limited as of now
 

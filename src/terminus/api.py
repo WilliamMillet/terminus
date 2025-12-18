@@ -16,8 +16,8 @@ class RouteOptions(TypedDict, total=False):
 
 class API:
     def __init__(self) -> None:
-        self.router = Router()
-        self.pipeline = ExecutionPipeline()
+        self._router = Router()
+        self._pipeline = ExecutionPipeline()
     
     def __call__(self, environ: WSGIEnvironment,
                  start_response: StartResponse) -> Iterable[bytes]:
@@ -29,13 +29,13 @@ class API:
         method = HTTPMethod(method_str)
         
         path = environ.get("PATH_INFO", "/")
-        route_details = self.router.match_route(method, path)
+        route_details = self._router.match_route(method, path)
         if route_details is None:
             return Response.send_err(start_response, f"Route '{method_str} {path}' not found", 404)
         
         try:
             req = RequestFactory.build_req(environ, route_details)
-            pipeline_res = self.pipeline.execute(route_details.fn, req)
+            pipeline_res = self._pipeline.execute(route_details.fn, req)
         except HTTPError as e:
             return Response.send_err(start_response, str(e), e.status)
         else:
@@ -48,18 +48,18 @@ class API:
             fn_with_middleware = ExecutionPipeline.compose_middleware(
                 fn, opts.get("pre"), opts.get("after")
             )                
-            self.router.register_route(method, path, fn_with_middleware)
+            self._router.register_route(method, path, fn_with_middleware)
             return fn
         return decorator
     
     def pre_request(self, fn: MiddlewareFn):
         """Global middleware to execute before the core route function anytime a route is called"""
-        self.pipeline.add_before_main_fn(fn)
+        self._pipeline.add_before_main_fn(fn)
         return fn
     
     def after_request(self, fn: AfterWareFn):
         """Global middleware to execute after the route function anytime a route is called"""
-        self.pipeline.add_after_main_fn(fn)
+        self._pipeline.add_after_main_fn(fn)
         return fn
     
     # Separate methods are used here over a generalised __getattr__ method as it allows for

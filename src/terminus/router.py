@@ -26,7 +26,7 @@ class Router:
     def __init__(self) -> None:
         # Separate tries exist for each HTTP method and each part length (e.g. routes with two parts
         # like /data/users will be in the Route at key two)
-        self.routes: dict[HTTPMethod, dict[int, RouteNode]] = {
+        self._routes: dict[HTTPMethod, dict[int, RouteNode]] = {
             method: {} for method in HTTPMethod
         }
 
@@ -34,7 +34,7 @@ class Router:
         """Attempts to register a route to the router"""
         parts = raw_path.split("/")
         
-        method_routes = self.routes[method]
+        method_routes = self._routes[method]
         if len(parts) not in method_routes:
             method_routes[len(parts)] = RouteNode(None)
             
@@ -73,7 +73,7 @@ class Router:
         """
         parts = raw_path.split("/")
         
-        method_routes = self.routes[method]
+        method_routes = self._routes[method]
         if len(parts) not in method_routes:
             return None
     

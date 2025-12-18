@@ -25,13 +25,13 @@ class ResponseFields:
 class Response:
     def __init__(self, fn_res: RouteFnRes, start_response: StartResponse) -> None:
         res_fields = Response.parse_function_res(fn_res)
-        self.body = [res_fields.body]
+        self._body = [res_fields.body]
         headers = [
             ("Content-type", res_fields.content_type.value),
             ("Content-Length", str(len(res_fields.body)))
         ]
         
-        self.response_routine = lambda: start_response(res_fields.status, headers)
+        self._response_routine = lambda: start_response(res_fields.status, headers)
             
     @staticmethod
     def parse_function_res(fn_res: RouteFnRes) -> ResponseFields:
@@ -83,8 +83,8 @@ class Response:
         Triggers the start response routine and returns the body in a format
         that can be returned exactly by the WSGI callable entrypoint
         """
-        self.response_routine()
-        return self.body
+        self._response_routine()
+        return self._body
     
     @staticmethod
     def send_err(start_response: StartResponse, err_msg: str, err_code: int = 500) -> list[bytes]:

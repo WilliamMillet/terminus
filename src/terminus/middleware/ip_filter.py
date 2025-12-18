@@ -3,7 +3,7 @@ from ipaddress import ip_address, IPv4Address
 from terminus.execution_pipeline import MiddlewareFnRes, MiddlewareFn
 from terminus.types import Request, HTTPError
 
-def ip_restrict(whitelist: list[str] | None = None,
+def create_restrictor(whitelist: list[str] | None = None,
                 blacklist: list[str] | None = None,
                 protocol: Literal["ipv4"] | Literal["ipv6"] | None = None) -> MiddlewareFn:
     """Create a middleware function based a blacklist, whitelist and or protocol restriction"""

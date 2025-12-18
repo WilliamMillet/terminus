@@ -33,6 +33,7 @@ class RequestFactory:
             body=body,
             query=RequestFactory.build_query(environ["QUERY_STRING"]),
             protocol=environ["SERVER_PROTOCOL"],
+            path=environ["PATH_INFO"],
             headers=Headers.of(environ)
         )
     

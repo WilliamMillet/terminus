@@ -90,25 +90,3 @@ class API:
         return self._build_route_decorator(HTTPMethod.CONNECT, path, **opts)
             
 api = API()
-
-
-# Temporary testing
-@api.post("/")
-def hello(req: Request):
-    return "hello", 200
-
-@api.get("/hello/world")
-def hello_world(req: Request):
-    return "hello_world", 200
-
-@api.get("/hello/foo/world")
-def hello_foo_world(req: Request):
-    return "hello_foo_world", 200
-
-@api.get("/hello/[param]/world")
-def hello_param_world(req: Request):
-    return "hello_world [param mode]", 200
-
-@api.get("/hello/there")
-def hello_there(req: Request):
-    return "hello there", 200

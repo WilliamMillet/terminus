@@ -6,7 +6,7 @@ import pytest
 from terminus.api import API
 from terminus.tests.utils import build_environ
 from terminus.types import Request, HTTPMethod, HTTPError
-from terminus.middleware.ip_filter import ip_restrict
+from terminus.middleware.ip_filter import create_restrictor
 
 IPV4_IP = "192.168.1.1"
 IPV6_IP = "2001:db8:130f:0000:0000:09c0:876a:130b"
@@ -14,7 +14,7 @@ IPV6_IP = "2001:db8:130f:0000:0000:09c0:876a:130b"
 def test_simple_whitelist(mocker: MockerFixture) -> None:
     api = API()
     
-    restrictor1 = ip_restrict(whitelist=["127.0.0.1"])
+    restrictor1 = create_restrictor(whitelist=["127.0.0.1"])
     @api.get("/1", pre=[restrictor1])
     def fn1(req: Request):
         return "Body"
@@ -29,7 +29,7 @@ def test_simple_whitelist(mocker: MockerFixture) -> None:
     body1 = next(iter(res1)).decode("utf-8")
     assert body1 == "Body"
     
-    restrictor2 = ip_restrict(whitelist=["127.0.0.2"])
+    restrictor2 = create_restrictor(whitelist=["127.0.0.2"])
     @api.get("/2", pre=[restrictor2])
     def fn2(req: Request):
         return "Body"
@@ -47,7 +47,7 @@ def test_simple_whitelist(mocker: MockerFixture) -> None:
 def test_simple_blacklist(mocker: MockerFixture) -> None:
     api = API()
     
-    restrictor1 = ip_restrict(blacklist=["127.0.0.2"])
+    restrictor1 = create_restrictor(blacklist=["127.0.0.2"])
     @api.get("/1", pre=[restrictor1])
     def fn1(req: Request):
         return "Body"
@@ -62,7 +62,7 @@ def test_simple_blacklist(mocker: MockerFixture) -> None:
     body1 = next(iter(res1)).decode("utf-8")
     assert body1 == "Body"
     
-    restrictor2 = ip_restrict(blacklist=["127.0.0.1"])
+    restrictor2 = create_restrictor(blacklist=["127.0.0.1"])
     @api.get("/2", pre=[restrictor2])
     def fn2(req: Request):
         return "Body"
@@ -87,7 +87,7 @@ def test_protocol_filter(mocker: MockerFixture, protocol: Literal["ipv4"] | Lite
                          example: str, counter_example: str) -> None:
     api = API()
     
-    restrictor1 = ip_restrict(protocol=protocol)
+    restrictor1 = create_restrictor(protocol=protocol)
     @api.get("/1", pre=[restrictor1])
     def fn1(req: Request):
         return "Body"
@@ -118,7 +118,7 @@ def test_whitelist_and_blacklist_together(mocker: MockerFixture) -> None:
     with pytest.raises(HTTPError):
         api = API()
         
-        restrictor1 = ip_restrict(whitelist=[IPV4_IP], blacklist=[IPV6_IP])
+        restrictor1 = create_restrictor(whitelist=[IPV4_IP], blacklist=[IPV6_IP])
         @api.get("/", pre=[restrictor1])
         def fn1(req: Request):
             return "Body"

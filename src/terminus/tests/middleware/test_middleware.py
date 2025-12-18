@@ -3,7 +3,7 @@ from pytest import CaptureFixture
 
 from terminus.api import API
 from terminus.tests.utils import build_environ
-from terminus.types import Request, HTTPMethod, RouteFnRes
+from terminus.types import Request, HTTPMethod
 
 # Global middleware tests
 
@@ -119,7 +119,6 @@ def test_specific_pre_route_middleware(mocker: MockerFixture) -> None:
 def test_specific_post_route_middleware(mocker: MockerFixture, capsys: CaptureFixture) -> None:
     api = API()
     
-    @api.after_request
     def post_ware(req: Request):
         print("MY_UNIQUE_STRING")
         

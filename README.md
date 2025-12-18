@@ -69,7 +69,18 @@ Terminus provides an immutable `Request` object for interacting with the HTTP re
     - `content_type`: A `ContentType` enum representing the content type being sent (e.g "`application/json`"). The value of this will be the actual content type header string.
 
 ## Middleware
-Terminus supports the use of middleware before and after a core function request. This can be used for authentication, logging, validation and various other tasks. One way to start a global middleware *pipeline* is to use the `pre_request` decorator:
+Terminus supports the use of middleware before and after a core function request. This can be used for authentication, logging, validation and various other tasks. There are two types of middleware:
+- **API global middleware** - executes before or after all routes in the API
+- **Route specific middleware** - executes before or after *one* specific route
+Both of these exists as part of the *middleware pipeline*, which executes in the following order:
+1. API global middleware defined using the `pre_request` decorator. Within this stage of the pipeline, execution will occur in the code order that the `pre-request` decorators are used. For example, if I decorate one piece of middleware on line 1 and another on line 23, the one on line 1 will execute first.
+2. Route specific middleware defined using the `pre` keyword argument on a route decorator. The value of the `pre` argument should be a list, and execution should occur from the start to the end of the list
+3. The primary function itself defined using `@api.[method]`
+4. Route specific middleware defined using the `after` keyword argument. The ordering within this works the same as route specific middleware defined with the `pre` keyword argument
+5. API global middleware defined using the `after_request` decorator. The ordering when multiple of pieces of this middleware exist is the same as API global middleware that executes before a function
+
+### API global middleware
+To define piece of API global middleware that executes before a function, you can do the following: 
 ```py
 @api.pre_request
 def pre1(req: Request):
@@ -104,9 +115,42 @@ def auth(req: Request):
     req.context["id"] = validated_id
 ```
 
+### Route specific middleware
+Route specific middleware is defined in the route decorator `@api.[route]`. If you want to define middleware to execute before the route you use the `pre` keyword, and if you want middleware to execute after the route you use the `after` keyword. For both of these, you can define a list of the middleware you want executed:
+```py
+    def pre_ware(req: Request):
+        req.context["foo"] = "bar"
+    
+    def bar_ware(req: Request):
+        print("My middleware log")
+        
+    @api.get("/", pre=[pre_ware], after=[bar_ware])
+    def fn(req: Request):
+        # Logic
+```
+
+### Built in middleware
+Terminus provides numerous pieces of built in middleware, all of which can be imported from `terminus.middleware`. `terminus.middleware` also contains all factories to create these functions. Documentation for all built in middleware can be found below:
+
+#### `restrictor`
+`restrictor` is a unit of middleware that allows you to limit what IP addresses have access to your API or a route of that API. To create a `restrictor` decorator, you can use the `create_restrictor` function This accepts the following optional parameters:
+- `blacklist` - A list of string IP addresses that are not allowed to access the API/route
+- `whitelist` - An exclusive list of string IP addresses that allowed to access the API/route
+- `protocol` - The exclusive protocol that can access teh API/route. This can be either the string `"ipv4"` or `"ipv6"`. If left blank, both are allowed.
+
+> Note that the `blacklist` and `whitelist` fields cannot be used simultaneously.
+
+#### `identifier`
+This attaches a unique request ID to the `context` of a request object under the key `"unique_id"`. If the request has an HTTP header `X-Request-ID`, then this will be used as the ID. Otherwise, a stringified UUID4 will be used.
+
+#### `logger`
+This allows for a passing request to be logged in a specified level of detail. To create a unit of logger middleware, you can use the `create_logger` function which accepts various arguments about what should be logged. This includes the file to write to, if the body should be included, and more. The full details and restrictions relating to these arguments can be found in the Python docstring for the function.
+
 # Technical notes
-The 8 near identical methods `get`, `post`, `put`, etc in `api.py` do not constitute the prettiest code, although I am of the belief it is superior to the alternative. Previously I used
+The 8 near identical methods `get`, `post`, `put`, etc in `api.py` aren't the prettiest code, although I am of the belief it is superior to the alternative. Previously I used
 the  use the `__getattr__` method. However, there a fundamental problems that arise when using this method with static type checkers like MyPy. When typing this function, we would have to use the Callable type from typing which does not allow for optional arguments.
+
+
 ```py
 def __getattr__(self, name: str) -> Callable[[str, list[MiddlewareFn] | None, list[MiddlewareFn] | None], RouteDecorator # Many more arguments...
 	pass

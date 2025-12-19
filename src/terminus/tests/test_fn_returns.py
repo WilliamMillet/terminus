@@ -58,7 +58,7 @@ def test_non_dictionary_cookie_res_raises(mocker: MockerFixture) -> None:
         start_response = mocker.Mock()
         api(build_environ("/") , start_response)
 
-def test_non_dictionary_cookie_res_raises(mocker: MockerFixture) -> None:
+def test_non_str_cookie_res_raises(mocker: MockerFixture) -> None:
     """
     When an API endpoint returns a dictionary of cookies where a key or value is not a string,
     this should break even though a dictionary is being used

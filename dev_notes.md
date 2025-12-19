@@ -11,6 +11,7 @@ https://packaging.python.org/en/latest/tutorials/packaging-projects/
 - Add validator and parser system like the one described below
 - Cooking parsing
 - Allow for content types other then the ones I support. It is very limited as of now
+- Move to version 1.0.0 once the main stuff is done
 
 -Implement a configuration object to app or something, then pass that to constructors. Maybe have it as a non mutable dataclass with Pythons setter and getter decorators on each thing.
 

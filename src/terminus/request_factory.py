@@ -1,18 +1,27 @@
 import json
+from io import BytesIO
+from urllib.parse import parse_qs
 from wsgiref.types import WSGIEnvironment
 
-from urllib.parse import parse_qs
-from io import BytesIO
-
 from terminus.router import RouteDetails, Router
-from terminus.types import ContentType, RequestBody, QueryVariables, Request, Headers, HTTPMethod, HTTPError
+from terminus.types import (
+    ContentType,
+    Headers,
+    HTTPError,
+    HTTPMethod,
+    QueryVariables,
+    Request,
+    RequestBody,
+)
+
 
 class RequestFactory:
     BODY_KEYS = ("wsgi.input", "CONTENT_TYPE", "CONTENT_LENGTH")
     @staticmethod
     def build_req(environ: WSGIEnvironment, route_details: RouteDetails) -> "Request":
         """
-        Generate a structured request object from environmental variables and details about the route
+        Generate a structured request object from environmental variables and details about the
+        route.
         """
         included_body_keys = [k for k in RequestFactory.BODY_KEYS if k in environ]
         if len(included_body_keys) == len(RequestFactory.BODY_KEYS):

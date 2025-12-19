@@ -1,5 +1,7 @@
-from terminus.types import ContentType
 from dataclasses import dataclass
+
+from terminus.types import ContentType
+
 
 @dataclass(frozen=True)
 class BodyDTO:

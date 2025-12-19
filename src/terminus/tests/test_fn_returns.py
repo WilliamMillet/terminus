@@ -1,10 +1,12 @@
-import pytest
 import json
+
+import pytest
 from pytest_mock import MockerFixture
 
-from terminus.types import HTTPMethod, Request, HTTPError
 from terminus.api import API
 from terminus.tests.utils import build_environ
+from terminus.types import HTTPError, HTTPMethod, Request
+
 
 def test_singular_return(mocker: MockerFixture) -> None:
     """Test that when a non tuple is passed, the response defaults to 200"""
@@ -127,7 +129,7 @@ def test_long_tuple_is_disallowed(mocker: MockerFixture) -> None:
     
     start_response = mocker.Mock()
 
-    with pytest.raises(Exception):
+    with pytest.raises(HTTPError):
         api(build_environ("/bad") , start_response)
                
 def test_unknown_body_disallowed(mocker: MockerFixture) -> None:
@@ -138,11 +140,11 @@ def test_unknown_body_disallowed(mocker: MockerFixture) -> None:
     @api.get("/bad")
     def hello(req: Request):
         # Set is not a valid type
-        return set([1, 2, 3]), 200
+        return {1, 2, 3}, 200
     
     start_response = mocker.Mock()
     
-    with pytest.raises(Exception):
+    with pytest.raises(HTTPError):
         api(build_environ("/bad") , start_response)
         
 def test_unparsable_dict_sends_err(mocker: MockerFixture) -> None:
@@ -153,5 +155,5 @@ def test_unparsable_dict_sends_err(mocker: MockerFixture) -> None:
         return {(1, 2, 3): "I am a tuple key"}, 200
     
     start_response = mocker.Mock()
-    with pytest.raises(Exception):
-        res = api(build_environ("/return/json") , start_response)
+    with pytest.raises(HTTPError):
+        api(build_environ("/return/json") , start_response)

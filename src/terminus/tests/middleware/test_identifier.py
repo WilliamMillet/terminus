@@ -1,11 +1,10 @@
 from pytest_mock import MockerFixture
-from pytest import CaptureFixture, raises
 
 from terminus.api import API
+from terminus.middleware import identifier
 from terminus.tests.utils import build_environ
-from terminus.types import Request, HTTPMethod, HTTPError
-from terminus.middleware import create_logger, identifier
-from terminus.tests.types import BodyDTO
+from terminus.types import Request
+
 
 def test_identifier_with_x_request_id(mocker: MockerFixture) -> None:
     """

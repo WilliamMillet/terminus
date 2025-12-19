@@ -1,7 +1,8 @@
+import uuid
+
 from terminus.execution_pipeline import MiddlewareFnRes
 from terminus.types import Request
 
-import uuid
 
 def identifier(req: Request) -> MiddlewareFnRes:
     """

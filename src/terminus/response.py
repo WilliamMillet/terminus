@@ -1,11 +1,10 @@
 import json
-
-from wsgiref.types import StartResponse
 from dataclasses import dataclass, field
 from typing import Any
+from wsgiref.types import StartResponse
 
-from terminus.types import ContentType, RouteFnRes, Cookies, WSGIFormatHeaders, HTTPError
 from terminus.constants import STATUS_CODE_MAP
+from terminus.types import ContentType, Cookies, HTTPError, RouteFnRes, WSGIFormatHeaders
 
 VALID_BODY_TYPE_NAMES = [
     "dict"
@@ -39,9 +38,10 @@ class Response:
         res_fields = Response._parse_function_res(fn_res)
         self._body = [res_fields.body]
         headers: WSGIFormatHeaders = [
+            *res_fields.extra_headers,
             ("Content-Type", res_fields.content_type.value),
             ("Content-Length", str(len(res_fields.body)))
-        ] + res_fields.extra_headers
+        ] 
         
         self._response_routine = lambda: start_response(res_fields.status, headers)
             
@@ -94,8 +94,8 @@ class Response:
         if isinstance(fn_res, tuple):
             if not (0 < len(fn_res) <= 3):
                 # HTTPError is raised here is this is a developer issue
-                raise HTTPError("Invalid route return value. If route is a tuple, it must be of the" +
-                                "The form (body, status) or (body, status, cookies)")
+                raise HTTPError("Invalid route return value. If route is a tuple, it must be of " +
+                                "the form (body, status) or (body, status, cookies)")
             
             body = fn_res[0]
             if len(fn_res) >= 2:

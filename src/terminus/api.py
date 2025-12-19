@@ -1,11 +1,12 @@
-from wsgiref.types import WSGIEnvironment, StartResponse
-from typing import Iterable, Callable, TypedDict, Unpack, Any
+from collections.abc import Callable, Iterable
+from typing import TypedDict, Unpack
+from wsgiref.types import StartResponse, WSGIEnvironment
 
-from terminus.types import HTTPMethod, Request, HTTPError
-from terminus.router import Router, RouteFn
-from terminus.response import Response
+from terminus.execution_pipeline import AfterWareFn, ExecutionPipeline, MiddlewareFn
 from terminus.request_factory import RequestFactory
-from terminus.execution_pipeline import ExecutionPipeline, MiddlewareFn, AfterWareFn
+from terminus.response import Response
+from terminus.router import RouteFn, Router
+from terminus.types import HTTPError, HTTPMethod
 
 type RouteDecorator = Callable[[RouteFn], RouteFn]
 
@@ -42,7 +43,8 @@ class API:
             http_res = Response(pipeline_res, start_response)
             return http_res.send()
     
-    def _build_route_decorator(self, method: HTTPMethod, path: str, **opts: Unpack[RouteOptions]) -> RouteDecorator:
+    def _build_route_decorator(self, method: HTTPMethod, path: str, **opts: Unpack[RouteOptions]
+                               ) -> RouteDecorator:
         """Build a decorator function for some specific HTTP method"""
         def decorator(fn: RouteFn) -> RouteFn:
             fn_with_middleware = ExecutionPipeline.compose_middleware(

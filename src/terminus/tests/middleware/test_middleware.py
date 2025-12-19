@@ -1,9 +1,9 @@
-from pytest_mock import MockerFixture
 from pytest import CaptureFixture
+from pytest_mock import MockerFixture
 
 from terminus.api import API
 from terminus.tests.utils import build_environ
-from terminus.types import Request, HTTPMethod
+from terminus.types import HTTPMethod, Request
 
 # Global middleware tests
 

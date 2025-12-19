@@ -1,12 +1,13 @@
-from pytest_mock import MockerFixture
-from pytest import CaptureFixture, raises
 from pathlib import Path
 
+from pytest import CaptureFixture, raises
+from pytest_mock import MockerFixture
+
 from terminus.api import API
-from terminus.tests.utils import build_environ
-from terminus.types import Request, HTTPMethod, RouteError
 from terminus.middleware import create_logger, identifier
 from terminus.tests.types import BodyDTO
+from terminus.tests.utils import build_environ
+from terminus.types import HTTPMethod, Request, RouteError
 
 BASE_LOG_KEYS = "Timestamp", "Log ID", "Method", "Path", "Path parameters", "Query parameters"
 

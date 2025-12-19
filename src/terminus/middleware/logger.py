@@ -1,9 +1,10 @@
-from terminus.execution_pipeline import MiddlewareFnRes, MiddlewareFn
-from terminus.types import Request, RouteError
+import uuid
 from datetime import datetime
-
-import uuid 
 from pathlib import Path
+
+from terminus.execution_pipeline import MiddlewareFn, MiddlewareFnRes
+from terminus.types import Request, RouteError
+
 
 def create_logger(write_to: Path | None = None, include_body: bool = False,
                   include_headers: bool = False, include_req_id: bool = False,
@@ -19,7 +20,7 @@ def create_logger(write_to: Path | None = None, include_body: bool = False,
         - <include_context> Whether or not to include the request context property in the request
     """
     
-    stringify_dict = lambda d: "[" + ", ".join(f"{str(k)}={str(v)}" for k, v in d.items()) + "]"
+    stringify_dict = lambda d: "[" + ", ".join(f"{k!s}={v!s}" for k, v in d.items()) + "]"
     
     def logger(req: Request) -> MiddlewareFnRes:
         log_obj: dict[str, str] = {

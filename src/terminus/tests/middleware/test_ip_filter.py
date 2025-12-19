@@ -1,12 +1,13 @@
-from pytest_mock import MockerFixture
-from typing import Literal
 import json
+from typing import Literal
+
 import pytest
+from pytest_mock import MockerFixture
 
 from terminus.api import API
-from terminus.tests.utils import build_environ
-from terminus.types import Request, HTTPMethod, HTTPError
 from terminus.middleware.ip_filter import create_restrictor
+from terminus.tests.utils import build_environ
+from terminus.types import HTTPError, HTTPMethod, Request
 
 IPV4_IP = "192.168.1.1"
 IPV6_IP = "2001:db8:130f:0000:0000:09c0:876a:130b"

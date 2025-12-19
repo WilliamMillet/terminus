@@ -4,13 +4,15 @@ Test for the request object passed to each function.
 Params are not tested here because they are sufficiently covered in test_routing.py
 """
 import json
+
 import pytest
 from pytest_mock import MockerFixture
 
 from terminus.api import API
-from terminus.tests.utils import build_environ
 from terminus.tests.types import BodyDTO
-from terminus.types import Request, HTTPMethod, ContentType
+from terminus.tests.utils import build_environ
+from terminus.types import ContentType, HTTPMethod, Request
+
 
 def test_req_headers(mocker: MockerFixture) -> None:
     """

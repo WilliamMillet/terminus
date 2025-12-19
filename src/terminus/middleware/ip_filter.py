@@ -1,7 +1,9 @@
+from ipaddress import IPv4Address, ip_address
 from typing import Literal
-from ipaddress import ip_address, IPv4Address
-from terminus.execution_pipeline import MiddlewareFnRes, MiddlewareFn
-from terminus.types import Request, HTTPError
+
+from terminus.execution_pipeline import MiddlewareFn, MiddlewareFnRes
+from terminus.types import HTTPError, Request
+
 
 def create_restrictor(whitelist: list[str] | None = None,
                 blacklist: list[str] | None = None,
@@ -16,7 +18,9 @@ def create_restrictor(whitelist: list[str] | None = None,
         if protocol is not None:
             is_ipv4 = isinstance(ip_address(ip), IPv4Address)
             if (is_ipv4 and (protocol != "ipv4")) or (not is_ipv4 and (protocol == "ipv4")):
-                return {"error": f"Unsupported IP protocol. Only {protocol.upper()} is permitted"}, 403
+                return {
+                    "error": f"Unsupported IP protocol. Only {protocol.upper()} is permitted"
+                }, 403
         
         if whitelist is not None and ip not in whitelist:
             return {"error": f"IP '{ip}' is not whitelisted"}, 403

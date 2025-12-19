@@ -1,9 +1,9 @@
-from dataclasses import dataclass
 from bisect import bisect_left, insort_left
-from typing import Callable
+from collections.abc import Callable
+from dataclasses import dataclass
 
 from terminus.response import RouteFnRes
-from terminus.types import HTTPMethod, PathVariables, Request
+from terminus.types import HTTPMethod, PathVariables, Request, RouteError
 
 type RouteFn = Callable[[Request], RouteFnRes]
 type RouteMap = dict[HTTPMethod, dict[str, RouteFn]]
@@ -55,7 +55,7 @@ class Router:
                 if not inbound or curr.children[pos_idx].content != p:
                     insort_left(curr.children, new_node)
                 elif i + 1 == len(parts):
-                    raise Exception(f"Cannot register route '{raw_path}' that already exists")
+                    raise RouteError(f"Cannot register route '{raw_path}' that already exists")
                 
                 curr = curr.children[pos_idx]
         

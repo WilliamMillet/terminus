@@ -10,3 +10,19 @@ authors = [
 
 [project.urls]
 Repository = "https://github.com/WilliamMillet/terminus"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+ignore = ["E731", "B904", "SIM108"]
+extend-select = [
+  "E501",  # line length
+  "I",     # import sorting
+  "UP",    # pyupgrade
+  "B",     # bugbear
+  "SIM",   # simplify
+  "C4",    # comprehensions
+  "PIE",   # flake8-pie
+  "RUF",   # ruff-specific
+]

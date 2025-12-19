@@ -1,12 +1,14 @@
 """Tests for the route tree algorithm"""
 
-import pytest
 import json
+
+import pytest
 from pytest_mock import MockerFixture
 
-from terminus.types import HTTPMethod, Request
 from terminus.api import API
 from terminus.tests.utils import build_environ
+from terminus.types import HTTPMethod, Request, RouteError
+
 
 def test_unknown_route(mocker: MockerFixture) -> None:
     api = API()
@@ -139,10 +141,10 @@ def test_register_duplicate_route(mocker: MockerFixture) -> None:
     def a(req: Request):
         return req.query["q"]
     
-    with pytest.raises(Exception):
+    with pytest.raises(RouteError):
         @api.get("/")
         def a_dup(req: Request):
             return req.query["q"]
         
         start_response = mocker.Mock()
-        api(build_environ(f"/"), start_response)
+        api(build_environ("/"), start_response)

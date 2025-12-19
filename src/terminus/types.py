@@ -1,10 +1,10 @@
 """
 General types not specific to any of the other modules
 """
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 from wsgiref.types import WSGIEnvironment
-from dataclasses import dataclass, field
 
 type WSGIFormatHeaders = list[tuple[str, str]]
 
@@ -100,4 +100,3 @@ class RouteError(Exception):
     """
     An error related to the definition of a route or it's middleware on the part of a developer
     """
-    pass

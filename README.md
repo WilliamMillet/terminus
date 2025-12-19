@@ -5,15 +5,11 @@ Terminus is a clean and intuitive backend web framework for Python implemented o
 - Simplified objects such as `Request` and `Headers` and `Response` for rapid development
 
 (and more to come!)
-# Running
-As of now, the server can be run be executing this command while in the `src` folder:
-```bash
-gunicorn -w 1 -b 127.0.0.1:8000 --reload --log-level debug --capture-output terminus.api:api
-```
-This will restart when the python code changes.
 
-I will (hopefully) soon add a simplified command for running the server
 # Framework Guide
+## The API object
+A web app built in Terminus will be centred around an instance of the `API` object. It acts as the entry point to your app, and provides various decorator methods for registering routes and middleware.
+
 ## Routes
 To declare a route in Terminus, you can use one of various decorators implemented for each HTTP method. This must contain the path the route should be triggered by, and support a request object.
 ```py
@@ -158,6 +154,15 @@ This attaches a unique request ID to the `context` of a request object under the
 
 #### `logger`
 This allows for a passing request to be logged in a specified level of detail. To create a unit of logger middleware, you can use the `create_logger` function which accepts various arguments about what should be logged. This includes the file to write to, if the body should be included, and more. The full details and restrictions relating to these arguments can be found in the Python docstring for the function.
+
+# Running
+As of now, the server can be run be executing this command while in the `src` folder:
+```bash
+gunicorn -w 1 -b 127.0.0.1:8000 --reload --log-level debug --capture-output terminus.api:api
+```
+This will restart when the python code changes.
+
+I will (hopefully) soon add a simplified command for running the server
 
 # Technical notes
 The 8 near identical methods `get`, `post`, `put`, etc in `api.py` aren't the prettiest code, although I am of the belief it is superior to the alternative. Previously I used

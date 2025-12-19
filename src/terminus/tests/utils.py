@@ -1,7 +1,7 @@
 
-from wsgiref.util import setup_testing_defaults
-from wsgiref.types import WSGIEnvironment
 from io import BytesIO
+from wsgiref.types import WSGIEnvironment
+from wsgiref.util import setup_testing_defaults
 
 from terminus.tests.types import BodyDTO
 from terminus.types import HTTPMethod
@@ -9,7 +9,8 @@ from terminus.types import HTTPMethod
 URI_MAX_PARTS = 2
 
 EXTRA_ENVIRON_DEFAULTS = {
-    'HTTP_ACCEPT': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    'HTTP_ACCEPT': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,' +
+    'image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
     'HTTP_ACCEPT_LANGUAGE': 'en-US,en;q=0.9',
     'HTTP_ACCEPT_ENCODING':  'gzip, deflate, br, zstd',
     'HTTP_CONNECTION': 'keep-alive',

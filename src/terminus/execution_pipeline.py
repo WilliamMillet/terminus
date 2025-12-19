@@ -1,6 +1,7 @@
-from typing import Callable
+from collections.abc import Callable
+
 from terminus.router import RouteFn
-from terminus.types import Request, RouteFnRes, Request
+from terminus.types import Request, RouteFnRes
 
 type MiddlewareFnRes = RouteFnRes | None
 type MiddlewareFn = Callable[[Request], MiddlewareFnRes]

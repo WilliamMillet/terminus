@@ -1,10 +1,12 @@
 
 import json
+
 from pytest_mock import MockerFixture
 
 from terminus.api import API
-from terminus.types import HTTPMethod, Request
 from terminus.tests.utils import build_environ
+from terminus.types import HTTPMethod, Request
+
 
 def test_simple_get(mocker: MockerFixture) -> None:
     api = API()

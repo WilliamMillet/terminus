@@ -18,7 +18,7 @@ def test_unknown_route(mocker: MockerFixture) -> None:
     
     status_args, headers_arg = start_response.call_args[0]
     assert "404" in status_args 
-    assert ("Content-type", "application/json") in headers_arg
+    assert ("Content-Type", "application/json") in headers_arg
     
     assert "error" in json.loads(next(iter(res)))
 
@@ -38,7 +38,7 @@ def test_wrong_method(mocker: MockerFixture) -> None:
     
     status_args, headers_arg = start_response.call_args[0]
     assert "404" in status_args 
-    assert ("Content-type", "application/json") in headers_arg
+    assert ("Content-Type", "application/json") in headers_arg
     
     assert "error" in json.loads(next(iter(res)))
     

@@ -43,7 +43,7 @@ def test_pre_middleware_early_res(mocker: MockerFixture) -> None:
     
     status_args, headers_arg = start_response.call_args[0]
     assert "400" in status_args 
-    assert ("Content-type", "text/plain") in headers_arg
+    assert ("Content-Type", "text/plain") in headers_arg
     
     assert next(iter(res)).decode("utf-8") == "Override"
     
@@ -91,7 +91,7 @@ def test_middleware_pipeline(mocker: MockerFixture, capsys: CaptureFixture) -> N
     
     status_args, headers_arg = start_response.call_args[0]
     assert "200" in status_args 
-    assert ("Content-type", "text/plain") in headers_arg
+    assert ("Content-Type", "text/plain") in headers_arg
     assert next(iter(res)).decode("utf-8") == "ab"
 
     std_buffers = capsys.readouterr()

@@ -39,9 +39,9 @@ class Response:
         res_fields = Response.parse_function_res(fn_res)
         self._body = [res_fields.body]
         headers: WSGIFormatHeaders = [
-            ("Content-type", res_fields.content_type.value),
+            ("Content-Type", res_fields.content_type.value),
             ("Content-Length", str(len(res_fields.body)))
-        ]
+        ] + res_fields.extra_headers
         
         self._response_routine = lambda: start_response(res_fields.status, headers)
             
@@ -99,20 +99,29 @@ class Response:
             
             body = fn_res[0]
             if len(fn_res) >= 2:
+                if not isinstance(fn_res[1], int):
+                    raise Exception(f"Status '{fn_res[1]}' is not valid. Only integers may be +"
+                                    + "returned as statuses")
                 status = Response.build_status(fn_res[1])
             if len(fn_res) >= 3:
+                if not isinstance(fn_res[2], dict):
+                    raise Exception("Cookies returned from function must be a dictionary. " +
+                                    str(fn_res[2]) + " is not a valid cookie dictionary")
+                for key, val in fn_res[2].items():
+                    if not isinstance(key, str) or not isinstance(val, str):
+                        raise Exception("The cookie dictionary returned by a function may only "
+                                        + "have string keys")
+                
                 cookie_list = Response._parse_cookies_as_header(fn_res[2])
                 cookies.extend(cookie_list)
         else:
             body = fn_res
-            
-        
         return NormalisedRouteFnRes(body, status, cookies)
-    
+
     @staticmethod
     def _parse_cookies_as_header(cookies: Cookies) -> WSGIFormatHeaders:
         return [
-            ("Set-Cookie", f"{key}={val,}Path=/; HttpOnly")
+            ("Set-Cookie", f"{key}={val} Path=/; HttpOnly")
             for key, val in cookies.items()
         ]
     
@@ -128,7 +137,7 @@ class Response:
     def send_err(start_response: StartResponse, err_msg: str, err_code: int = 500) -> list[bytes]:
         """Triggers the start response routine and returns the body for an error"""
         err_status = Response.build_status(err_code)
-        err_header = [("Content-type", ContentType.APPLICATION_JSON.value)]
+        err_header = [("Content-Type", ContentType.APPLICATION_JSON.value)]
         start_response(err_status, err_header)
         return [json.dumps({"error": err_msg}).encode("utf-8")]
     

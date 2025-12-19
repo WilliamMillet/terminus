@@ -18,7 +18,7 @@ def test_singular_return(mocker: MockerFixture) -> None:
     
     status_args, headers_arg = start_response.call_args[0]
     assert status_args == "200 OK" 
-    assert ("Content-type", "text/plain") in headers_arg
+    assert ("Content-Type", "text/plain") in headers_arg
     
     assert next(iter(res)).decode("utf-8") == "Hello World"
 
@@ -33,7 +33,7 @@ def test_unknown_status_has_no_message(mocker: MockerFixture) -> None:
     
     status_args, headers_arg = start_response.call_args[0]
     assert status_args == "1823" 
-    assert ("Content-type", "text/plain") in headers_arg
+    assert ("Content-Type", "text/plain") in headers_arg
 
 
 @pytest.mark.parametrize("primitive, string", [("Hello", "Hello"), (1, "1"), (True, "True")])
@@ -47,7 +47,7 @@ def test_primitive_like_bodies(mocker: MockerFixture, primitive, string) -> None
     res = api(build_environ("/return/primitive") , start_response)
     
     headers_arg = start_response.call_args[0][1]
-    assert ("Content-type", "text/plain") in headers_arg
+    assert ("Content-Type", "text/plain") in headers_arg
     
     assert next(iter(res)).decode("utf-8") == string
 
@@ -61,7 +61,7 @@ def test_byte_body(mocker: MockerFixture) -> None:
     res = api(build_environ("/return/bytes") , start_response)
     
     headers_arg = start_response.call_args[0][1]
-    assert  ("Content-type", "application/octet-stream") in headers_arg
+    assert  ("Content-Type", "application/octet-stream") in headers_arg
     
     assert next(iter(res)) == b"Hello World"
 
@@ -99,7 +99,7 @@ def test_json_body(mocker: MockerFixture, json_body, exp) -> None:
     res = api(environ, start_response)
     
     headers_arg = start_response.call_args[0][1]
-    assert ("Content-type", "application/json") in headers_arg
+    assert ("Content-Type", "application/json") in headers_arg
     
     decoded = next(iter(res)).decode()
     assert json.loads(decoded) == exp

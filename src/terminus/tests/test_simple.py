@@ -19,7 +19,7 @@ def test_simple_get(mocker: MockerFixture) -> None:
     
     status_arg, headers_arg = start_response.call_args[0]
     assert status_arg == "200 OK"
-    assert ("Content-type", "text/plain") in headers_arg
+    assert ("Content-Type", "text/plain") in headers_arg
     assert ("Content-Length", str(len("Hello World"))) in headers_arg
     
     res_list = list(res)
@@ -41,7 +41,7 @@ def test_unknown_http_method_sends_err(mocker: MockerFixture) -> None:
     assert len(args) == 2
     status_arg, headers_arg = args
     assert "500" in status_arg
-    assert headers_arg == [("Content-type", "application/json")] 
+    assert headers_arg == [("Content-Type", "application/json")] 
     
     assert "error" in json.loads(next(iter(res)))
     

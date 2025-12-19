@@ -4,7 +4,7 @@ from wsgiref.types import StartResponse
 from dataclasses import dataclass, field
 from typing import Any
 
-from terminus.types import ContentType, RouteFnRes, Cookies, WSGIFormatHeaders
+from terminus.types import ContentType, RouteFnRes, Cookies, WSGIFormatHeaders, HTTPError
 from terminus.constants import STATUS_CODE_MAP
 
 VALID_BODY_TYPE_NAMES = [
@@ -69,7 +69,7 @@ class Response:
             try:
                 body_str = json.dumps(body)
             except TypeError as e:
-                raise Exception(f"Body container type is valid (f{type(body)}), but it failed" +
+                raise HTTPError(f"Body container type is valid (f{type(body)}), but it failed" +
                                 "to be parsed. This is likely due to an invalid inner key such" +
                                 f"as a tuple, frozenset, etc. Parsing Error:\n {e}")
             return BodyTypePair(body_str.encode("utf8"), ContentType.APPLICATION_JSON)
@@ -80,7 +80,7 @@ class Response:
             return BodyTypePair(body_str.encode("utf-8"), ContentType.TEXT_PLAIN)
         else:
             wrong_type = type(body).__name__
-            raise Exception(f"Unsupported response body type '{wrong_type}'. Accepted types" +
+            raise HTTPError(f"Unsupported response body type '{wrong_type}'. Accepted types" +
                             " are: \n" + "\n - ".join(VALID_BODY_TYPE_NAMES) + "\n")
         
     @staticmethod
@@ -93,23 +93,23 @@ class Response:
         status = "200 OK"
         if isinstance(fn_res, tuple):
             if not (0 < len(fn_res) <= 3):
-                # Exception is raised here is this is a developer issue
-                raise Exception("Invalid route return value. If route is a tuple, it must be of the" +
+                # HTTPError is raised here is this is a developer issue
+                raise HTTPError("Invalid route return value. If route is a tuple, it must be of the" +
                                 "The form (body, status) or (body, status, cookies)")
             
             body = fn_res[0]
             if len(fn_res) >= 2:
                 if not isinstance(fn_res[1], int):
-                    raise Exception(f"Status '{fn_res[1]}' is not valid. Only integers may be +"
+                    raise HTTPError(f"Status '{fn_res[1]}' is not valid. Only integers may be "
                                     + "returned as statuses")
                 status = Response.build_status(fn_res[1])
             if len(fn_res) >= 3:
                 if not isinstance(fn_res[2], dict):
-                    raise Exception("Cookies returned from function must be a dictionary. " +
+                    raise HTTPError("Cookies returned from function must be a dictionary. " +
                                     str(fn_res[2]) + " is not a valid cookie dictionary")
                 for key, val in fn_res[2].items():
                     if not isinstance(key, str) or not isinstance(val, str):
-                        raise Exception("The cookie dictionary returned by a function may only "
+                        raise HTTPError("The cookie dictionary returned by a function may only "
                                         + "have string keys")
                 
                 cookie_list = Response._parse_cookies_as_header(fn_res[2])

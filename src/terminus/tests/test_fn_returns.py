@@ -2,7 +2,7 @@ import pytest
 import json
 from pytest_mock import MockerFixture
 
-from terminus.types import HTTPMethod, Request
+from terminus.types import HTTPMethod, Request, HTTPError
 from terminus.api import API
 from terminus.tests.utils import build_environ
 
@@ -23,6 +23,7 @@ def test_singular_return(mocker: MockerFixture) -> None:
     assert next(iter(res)).decode("utf-8") == "Hello World"
 
 def test_unknown_status_has_no_message(mocker: MockerFixture) -> None:
+    """Unknown status codes should not have a message"""
     api = API()
     @api.get("/unknown/status")
     def hello(req: Request):
@@ -35,6 +36,42 @@ def test_unknown_status_has_no_message(mocker: MockerFixture) -> None:
     assert status_args == "1823" 
     assert ("Content-Type", "text/plain") in headers_arg
 
+def test_non_int_status_raises(mocker: MockerFixture) -> None:
+    """Non integer status codes are not allowed and should raise an error for a developer"""
+    api = API()
+    @api.get("/")
+    def hello(req: Request):
+        return "Hi", "Totally really status code"
+
+    with pytest.raises(HTTPError):
+        start_response = mocker.Mock()
+        api(build_environ("/") , start_response)
+        
+def test_non_dictionary_cookie_res_raises(mocker: MockerFixture) -> None:
+    """API endpoint functions can only return cookie dictionaries of strings"""
+    api = API()
+    @api.get("/")
+    def hello(req: Request):
+        return "Hi", 200, "My cookie dictionary that should break"
+
+    with pytest.raises(HTTPError):
+        start_response = mocker.Mock()
+        api(build_environ("/") , start_response)
+
+def test_non_dictionary_cookie_res_raises(mocker: MockerFixture) -> None:
+    """
+    When an API endpoint returns a dictionary of cookies where a key or value is not a string,
+    this should break even though a dictionary is being used
+    """
+    api = API()
+    @api.get("/")
+    def hello(req: Request):
+        return "Hi", 200, {"Key", 190123}
+
+    with pytest.raises(HTTPError):
+        start_response = mocker.Mock()
+        api(build_environ("/") , start_response)
+        
 
 @pytest.mark.parametrize("primitive, string", [("Hello", "Hello"), (1, "1"), (True, "True")])
 def test_primitive_like_bodies(mocker: MockerFixture, primitive, string) -> None:

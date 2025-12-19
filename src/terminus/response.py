@@ -1,10 +1,10 @@
 import json
 
 from wsgiref.types import StartResponse
+from dataclasses import dataclass, field
 from typing import Any
-from dataclasses import dataclass
 
-from terminus.types import ContentType, RouteFnRes
+from terminus.types import ContentType, RouteFnRes, Cookies, WSGIFormatHeaders
 from terminus.constants import STATUS_CODE_MAP
 
 VALID_BODY_TYPE_NAMES = [
@@ -21,12 +21,24 @@ class ResponseFields:
     status: str
     body: bytes
     content_type: ContentType
+    extra_headers: WSGIFormatHeaders
     
+@dataclass(frozen=True)
+class NormalisedRouteFnRes:
+    body: Any
+    status: str = "200 OK"
+    cookies: WSGIFormatHeaders = field(default_factory=list)
+    
+@dataclass(frozen=True)
+class BodyTypePair:
+    content: bytes
+    content_type: ContentType
+
 class Response:
     def __init__(self, fn_res: RouteFnRes, start_response: StartResponse) -> None:
         res_fields = Response.parse_function_res(fn_res)
         self._body = [res_fields.body]
-        headers = [
+        headers: WSGIFormatHeaders = [
             ("Content-type", res_fields.content_type.value),
             ("Content-Length", str(len(res_fields.body)))
         ]
@@ -40,17 +52,19 @@ class Response:
         status, parses and encodes the body then returns relevant response
         fields
         """
-        if isinstance(fn_res, tuple) and len(fn_res) == 2:
-            status = Response.build_status(fn_res[1])
-            body = fn_res[0]
-        elif not isinstance(fn_res, tuple):
-            status = Response.build_status(200)
-            body = fn_res
-        else:
-            # Exception is raised here is this is a developer issue
-            raise Exception("Invalid route return value. If route is a tuple, it must be of the" +
-                            "The form (body, status)")
-            
+        normalised = Response._normalise_route_fn_res(fn_res)
+        parsed_body = Response._parse_body(normalised.body)
+        
+        return ResponseFields(
+            status=normalised.status,
+            body=parsed_body.content,
+            content_type=parsed_body.content_type,
+            extra_headers=normalised.cookies
+        )
+        
+    @staticmethod
+    def _parse_body(body: Any) -> BodyTypePair:
+        """Parse the response body and determine the content type according to this"""
         if isinstance(body, dict | list):
             try:
                 body_str = json.dumps(body)
@@ -58,25 +72,49 @@ class Response:
                 raise Exception(f"Body container type is valid (f{type(body)}), but it failed" +
                                 "to be parsed. This is likely due to an invalid inner key such" +
                                 f"as a tuple, frozenset, etc. Parsing Error:\n {e}")
-            content_type = ContentType.APPLICATION_JSON
-            encoded_body = body_str.encode("utf-8")
+            return BodyTypePair(body_str.encode("utf8"), ContentType.APPLICATION_JSON)
         elif isinstance(body, bytes):
-            content_type = ContentType.APPLICATION_OCTET_STREAM
-            encoded_body = body
+            return BodyTypePair(body, ContentType.APPLICATION_OCTET_STREAM)
         elif isinstance(body, int | float | str | bool):
             body_str = str(body)
-            content_type = ContentType.TEXT_PLAIN
-            encoded_body = body_str.encode("utf-8")
+            return BodyTypePair(body_str.encode("utf-8"), ContentType.TEXT_PLAIN)
         else:
             wrong_type = type(body).__name__
             raise Exception(f"Unsupported response body type '{wrong_type}'. Accepted types" +
                             " are: \n" + "\n - ".join(VALID_BODY_TYPE_NAMES) + "\n")
         
-        return ResponseFields(
-            status=status,
-            body=encoded_body,
-            content_type=content_type
-        )
+    @staticmethod
+    def _normalise_route_fn_res(fn_res: RouteFnRes) -> NormalisedRouteFnRes:
+        """
+        Convert the raw return value of a route endpoint function to a normalised
+        dataclass. This does not process the body.
+        """
+        cookies: WSGIFormatHeaders = []
+        status = "200 OK"
+        if isinstance(fn_res, tuple):
+            if not (0 < len(fn_res) <= 3):
+                # Exception is raised here is this is a developer issue
+                raise Exception("Invalid route return value. If route is a tuple, it must be of the" +
+                                "The form (body, status) or (body, status, cookies)")
+            
+            body = fn_res[0]
+            if len(fn_res) >= 2:
+                status = Response.build_status(fn_res[1])
+            if len(fn_res) >= 3:
+                cookie_list = Response._parse_cookies_as_header(fn_res[2])
+                cookies.extend(cookie_list)
+        else:
+            body = fn_res
+            
+        
+        return NormalisedRouteFnRes(body, status, cookies)
+    
+    @staticmethod
+    def _parse_cookies_as_header(cookies: Cookies) -> WSGIFormatHeaders:
+        return [
+            ("Set-Cookie", f"{key}={val,}Path=/; HttpOnly")
+            for key, val in cookies.items()
+        ]
     
     def send(self) -> list[bytes]:
         """

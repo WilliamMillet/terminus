@@ -6,11 +6,18 @@ from typing import Any
 from wsgiref.types import WSGIEnvironment
 from dataclasses import dataclass, field
 
+type WSGIFormatHeaders = list[tuple[str, str]]
+
 type PathVariables = dict[str, str]
 type QueryVariables = dict[str, str | list[str]]
 type RequestBody = dict | list | str | bytes
 
-type RouteFnRes = Any | tuple[Any, int]
+type Cookies = dict[str, str]
+
+type GenericBody = Any
+type BodyStatusPair = tuple[Any, int]
+type BodyStatusCookiesTriplet = tuple[Any, int, Cookies]
+type RouteFnRes = GenericBody | BodyStatusPair | BodyStatusCookiesTriplet
 
 class HTTPMethod(Enum):
     GET = "GET"
@@ -36,6 +43,7 @@ class Headers:
     connection: str
     remote_address: str
     content_type: ContentType | None
+    cookies: Cookies
     raw: dict[str, str]
     
     @staticmethod
@@ -49,6 +57,12 @@ class Headers:
                 parsed_key = key.replace("_", "-").title()
                 raw[parsed_key] = val
                 
+        cookies: dict[str, str] = {}
+        if "HTTP_COOKIE" in environ:
+            for cookie in environ["HTTP_COOKIE"].split("; "):
+                key, val = cookie.split("=")
+                cookies[key] = val
+             
         c_type = environ.get("CONTENT_TYPE", None)
         return Headers(
             host=environ["HTTP_HOST"],
@@ -57,6 +71,7 @@ class Headers:
             accept_encoding = environ["HTTP_ACCEPT_ENCODING"].split(", "),
             connection = environ["HTTP_CONNECTION"],
             remote_address = environ["REMOTE_ADDR"],
+            cookies = cookies,
             content_type = None if c_type is None else ContentType(c_type),
             raw=raw
         )

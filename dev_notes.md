@@ -5,7 +5,6 @@ https://packaging.python.org/en/latest/tutorials/packaging-projects/
 
 # TODO
 ## Shorter term goals
-- Go through and privatise private variables
 
 ## Longer term goals
 - Add a TOML with details like name, description, minimum version

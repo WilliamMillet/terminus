@@ -36,7 +36,7 @@ class BodyTypePair:
 
 class Response:
     def __init__(self, fn_res: RouteFnRes, start_response: StartResponse) -> None:
-        res_fields = Response.parse_function_res(fn_res)
+        res_fields = Response._parse_function_res(fn_res)
         self._body = [res_fields.body]
         headers: WSGIFormatHeaders = [
             ("Content-Type", res_fields.content_type.value),
@@ -46,7 +46,7 @@ class Response:
         self._response_routine = lambda: start_response(res_fields.status, headers)
             
     @staticmethod
-    def parse_function_res(fn_res: RouteFnRes) -> ResponseFields:
+    def _parse_function_res(fn_res: RouteFnRes) -> ResponseFields:
         """
         Takes the return value from a route's function and extracts the HTTP
         status, parses and encodes the body then returns relevant response
@@ -102,7 +102,7 @@ class Response:
                 if not isinstance(fn_res[1], int):
                     raise HTTPError(f"Status '{fn_res[1]}' is not valid. Only integers may be "
                                     + "returned as statuses")
-                status = Response.build_status(fn_res[1])
+                status = Response._build_status(fn_res[1])
             if len(fn_res) >= 3:
                 if not isinstance(fn_res[2], dict):
                     raise HTTPError("Cookies returned from function must be a dictionary. " +
@@ -136,13 +136,13 @@ class Response:
     @staticmethod
     def send_err(start_response: StartResponse, err_msg: str, err_code: int = 500) -> list[bytes]:
         """Triggers the start response routine and returns the body for an error"""
-        err_status = Response.build_status(err_code)
+        err_status = Response._build_status(err_code)
         err_header = [("Content-Type", ContentType.APPLICATION_JSON.value)]
         start_response(err_status, err_header)
         return [json.dumps({"error": err_msg}).encode("utf-8")]
     
     @staticmethod
-    def build_status(status_code: int) -> str:
+    def _build_status(status_code: int) -> str:
         """
         Build an HTTP status message of the format '[{CODE} {MESSAGE}]'
         """

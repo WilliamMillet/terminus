@@ -16,7 +16,7 @@ class RequestFactory:
         """
         included_body_keys = [k for k in RequestFactory.BODY_KEYS if k in environ]
         if len(included_body_keys) == len(RequestFactory.BODY_KEYS):
-            body = RequestFactory.parse_body(
+            body = RequestFactory._parse_body(
                 environ["wsgi.input"],
                 environ["CONTENT_TYPE"],
                 environ["CONTENT_LENGTH"]
@@ -31,14 +31,14 @@ class RequestFactory:
             method=HTTPMethod(environ["REQUEST_METHOD"]),
             params=Router.match_path_variables(route_details, environ["PATH_INFO"]),
             body=body,
-            query=RequestFactory.build_query(environ["QUERY_STRING"]),
+            query=RequestFactory._build_query(environ["QUERY_STRING"]),
             protocol=environ["SERVER_PROTOCOL"],
             path=environ["PATH_INFO"],
             headers=Headers.of(environ)
         )
     
     @staticmethod
-    def build_query(query_str: str) -> QueryVariables:
+    def _build_query(query_str: str) -> QueryVariables:
         """Build the query parameter string from environmental variables"""
         
         parsed = parse_qs(query_str)
@@ -57,7 +57,7 @@ class RequestFactory:
     
 
     @staticmethod
-    def parse_body(body: BytesIO, content_type: str, content_len: int) -> RequestBody:
+    def _parse_body(body: BytesIO, content_type: str, content_len: int) -> RequestBody:
         c_type = ContentType(content_type)
         match c_type:
             case ContentType.APPLICATION_JSON:

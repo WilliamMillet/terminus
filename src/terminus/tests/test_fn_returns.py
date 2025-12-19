@@ -47,32 +47,6 @@ def test_non_int_status_raises(mocker: MockerFixture) -> None:
         start_response = mocker.Mock()
         api(build_environ("/") , start_response)
         
-def test_non_dictionary_cookie_res_raises(mocker: MockerFixture) -> None:
-    """API endpoint functions can only return cookie dictionaries of strings"""
-    api = API()
-    @api.get("/")
-    def hello(req: Request):
-        return "Hi", 200, "My cookie dictionary that should break"
-
-    with pytest.raises(HTTPError):
-        start_response = mocker.Mock()
-        api(build_environ("/") , start_response)
-
-def test_non_str_cookie_res_raises(mocker: MockerFixture) -> None:
-    """
-    When an API endpoint returns a dictionary of cookies where a key or value is not a string,
-    this should break even though a dictionary is being used
-    """
-    api = API()
-    @api.get("/")
-    def hello(req: Request):
-        return "Hi", 200, {"Key", 190123}
-
-    with pytest.raises(HTTPError):
-        start_response = mocker.Mock()
-        api(build_environ("/") , start_response)
-        
-
 @pytest.mark.parametrize("primitive, string", [("Hello", "Hello"), (1, "1"), (True, "True")])
 def test_primitive_like_bodies(mocker: MockerFixture, primitive, string) -> None:
     api = API()

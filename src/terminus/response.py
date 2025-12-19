@@ -111,6 +111,8 @@ class Response:
                     if not isinstance(key, str) or not isinstance(val, str):
                         raise HTTPError("The cookie dictionary returned by a function may only "
                                         + "have string keys")
+                    if " " in key or " " in val:
+                        raise HTTPError("Cookies keys and values must not contain spaces")
                 
                 cookie_list = Response._parse_cookies_as_header(fn_res[2])
                 cookies.extend(cookie_list)

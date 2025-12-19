@@ -44,20 +44,31 @@ def hello_world(req: Request):
 ## Responses
 To return a response in your API endpoint, there are several options. If you wish to specify the status code, you must return a tuple `(body, status)`. The status field here must be an integer. The body can be of a range of types. The primitive-like types supported are `str`, `int`, `bool` which are stringified and encoded in UTF-8, as `bytes` which is left as is. For these types the *Content-Type* HTTP header will be set to `text/plain`, unless binary is used in which `application/octet-stream` is set. Lists and dictionaries are also supported. When either of these is returned, they are parsed to a JSON string which is encoded into a UTF-8 format. The content type will then be automatically set to `application/json`.
 
-If you return a non-tuple, the whole return type will be treated as the body and the status code will be automatically set to 200.
+There are 3 structures that an API endpoint function can return
+1. A pure body. This can be any of the body types listed above. When this structure is used, the status code defaults to `200`.
+2. A tuple of the body and an integer status code.
+3. A tuple of the body, an integer status code and a cookie dictionary. This dictionary contains key value pairs which will be included in the response, along with standard cookie attributes such as `HttpOnly`. These key value pairs must be strings with no spaces
+
+Some example return statements are
 ```py
-# ...Tuple return
+# Single return
+return "Hello World
+
+# Tuple return
 return "Failed to found user", 404
 
-# ...Single return
-return "Hello World
+# Tuple return
+return "Returning a cookie", 200, {"secret_cookie": "a_cookie"}
 ```
+
 ## Requests
 Terminus provides an immutable `Request` object for interacting with the HTTP request that triggered a function call. This provides the following properties
 - `method`: An `HTTPMethod` enum representing the method used in the request. The value of this enum will be the capitalised method name
 - `body`: The body of the call parsed as a `dict`, `list`, `str` or `bytes` in accordance with the `Content-Type` header. When including a body in an HTTP request, you must include the headers `Content-Type` and `Content-Length`. Failing to do this will lead to a 400 status code response. By default in Terminus, bodies will be automatically parsed according to the content type. For example, JSON responses will be parsed to dictionaries. A feature to disable this should be added in the future.
 - `params`: A dictionary of path parameters
 - `query`: A dictionary of query parameters. The values of this dictionary can be either a single string, or a list of strings if there where multiple of one key in the URL (e.g. `/app?a=1&a=2&a=3`).
+- `path`: The raw request path. Useful for logging.
+- `context`: An initially empty dictionary that is freely mutable. This is mainly useful for middleware pipelines (more details about this can be found in the middleware section of these docs)
 - `protocol`: The HTTP protocol string.
 - `headers`: A `Header` dataclass containing relevant HTTP headers. These headers are:
     - `host`: The HTTP host string
@@ -67,6 +78,8 @@ Terminus provides an immutable `Request` object for interacting with the HTTP re
     - `connection`: The `Connection` header value as a string
     - `remote_address`: The string IP of the requester
     - `content_type`: A `ContentType` enum representing the content type being sent (e.g "`application/json`"). The value of this will be the actual content type header string.
+    - `cookies`: A dictionary of cookie key value pairs
+    - `raw`: A dictionary with all header key value pairs in the HTTP request. Because WSGI provides headers in screaming snake case, these are converted to a human-readable title kebab-case (e.g. "Accept-Language"). However, a downside of that is previously uppercased words will be modified from there original HTTP form. For example, `X-Request-ID` will be acessible under `X-Request-Id`.
 
 ## Middleware
 Terminus supports the use of middleware before and after a core function request. This can be used for authentication, logging, validation and various other tasks. There are two types of middleware:
